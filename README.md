@@ -1,6 +1,6 @@
 # tailwind-fluid
 
-Build better responsive designs in less code using CSS `clamp()` for TailwindCSS v4.
+Build better responsive designs in less code using CSS `clamp()` for TailwindCSS v3 & v4.
 
 [![npm version](https://badge.fury.io/js/tailwind-fluid.svg)](https://badge.fury.io/js/tailwind-fluid)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -12,6 +12,7 @@ Build better responsive designs in less code using CSS `clamp()` for TailwindCSS
 - **First-class tailwind-merge support** - Properly resolves conflicts with regular utilities
 - **Accessibility compliance** - Warns about font sizes that may be too small
 - **TailwindCSS v4 compatible** - Works with the new CSS-first configuration
+- **TailwindCSS v3 compatible** - Also works with traditional JavaScript configuration
 
 ## Installation
 
@@ -53,6 +54,57 @@ This generates:
   padding: clamp(1rem, 0.5282rem + 2.0657vw, 2rem);
 }
 ```
+
+## Usage with TailwindCSS v3
+
+While this plugin is primarily designed for TailwindCSS v4, it can also work with **TailwindCSS v3** using the traditional JavaScript configuration approach.
+
+### Installation for v3
+
+Since the package specifies `tailwindcss ^4.0.0` as a peer dependency, you'll need to install with the `--legacy-peer-deps` flag:
+
+```bash
+npm install tailwind-fluid --legacy-peer-deps
+# or
+pnpm add tailwind-fluid --ignore-peer-deps
+# or
+yarn add tailwind-fluid --ignore-engines
+```
+
+### Configuration for v3
+
+Add the plugin to your `tailwind.config.js`:
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  content: ['./src/**/*.{html,js,jsx,ts,tsx}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [
+    require('tailwind-fluid')({
+      minViewport: 375,
+      maxViewport: 1440,
+      useRem: true,
+      rootFontSize: 16,
+      checkAccessibility: true,
+    })
+  ]
+}
+```
+
+### Usage in v3
+
+The fluid utilities work the same way in v3:
+
+```html
+<h1 class="fl-text-2xl/5xl fl-p-4/8">
+  Fluid Typography and Spacing
+</h1>
+```
+
+> **Note:** The CSS-based `@plugin` directive is **not available** in TailwindCSS v3. You must use the JavaScript configuration approach shown above.
 
 ## Syntax
 
