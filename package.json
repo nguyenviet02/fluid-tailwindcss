@@ -1,5 +1,5 @@
 {
-  "name": "tailwind-fluid",
+  "name": "fluid-tailwindcss",
   "version": "1.0.0",
   "description": "Build better responsive designs in less code using CSS clamp() for TailwindCSS v4",
   "author": "IceteaAI",
@@ -46,12 +46,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/IceteaAI/tailwind-fluid.git"
+    "url": "https://github.com/nguyenviet02/fluid-tailwindcss"
   },
   "bugs": {
-    "url": "https://github.com/IceteaAI/tailwind-fluid/issues"
+    "url": "https://github.com/nguyenviet02/fluid-tailwindcss/issues"
   },
-  "homepage": "https://github.com/IceteaAI/tailwind-fluid#readme",
+  "homepage": "https://github.com/nguyenviet02/fluid-tailwindcss#readme",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",

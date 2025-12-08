@@ -371,28 +371,6 @@ npm run test:run -- --coverage
 npm run test
 ```
 
-## Publishing
-
-### For Package Maintainers
-
-1. **Build the package:**
-   ```bash
-   npm run build
-   ```
-
-2. **Test locally with npm link:**
-   ```bash
-   npm link
-   cd /path/to/test-project
-   npm link tailwind-fluid
-   ```
-
-3. **Publish to npm:**
-   ```bash
-   npm login
-   npm publish
-   ```
-
 ### Versioning
 
 Follow semantic versioning:
