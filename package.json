@@ -1,8 +1,8 @@
 {
   "name": "fluid-tailwindcss",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Build better responsive designs in less code using CSS clamp() for TailwindCSS v4",
-  "author": "IceteaAI",
+  "author": "nguyenviet02",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
