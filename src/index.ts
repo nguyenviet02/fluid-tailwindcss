@@ -85,7 +85,7 @@ function createFluidDeclaration(
 }
 
 /**
- * The main tailwind-fluid plugin
+ * The main fluid-tailwindcss plugin
  */
 const fluidPlugin = plugin.withOptions<FluidOptions>(
   (options = {}) => {
@@ -135,7 +135,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
               if (utilityName === 'fl-text') {
                 const { warning } = checkAccessibility(minResolved, resolvedOptions, 'text')
                 if (warning) {
-                  console.warn(`[tailwind-fluid] ${warning}`)
+                  console.warn(`[fluid-tailwindcss] ${warning}`)
                 }
               }
 

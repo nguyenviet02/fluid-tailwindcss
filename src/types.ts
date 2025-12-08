@@ -1,5 +1,5 @@
 /**
- * Configuration options for the tailwind-fluid plugin
+ * Configuration options for the fluid-tailwindcss plugin
  */
 export interface FluidOptions {
   /**

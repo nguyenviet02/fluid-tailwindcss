@@ -1,8 +1,8 @@
-# tailwind-fluid
+# fluid-tailwindcss
 
 Build better responsive designs in less code using CSS `clamp()` for TailwindCSS v3 & v4.
 
-[![npm version](https://badge.fury.io/js/tailwind-fluid.svg)](https://badge.fury.io/js/tailwind-fluid)
+[![npm version](https://badge.fury.io/js/fluid-tailwindcss.svg)](https://badge.fury.io/js/fluid-tailwindcss)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
@@ -17,11 +17,11 @@ Build better responsive designs in less code using CSS `clamp()` for TailwindCSS
 ## Installation
 
 ```bash
-npm install tailwind-fluid
+npm install fluid-tailwindcss
 # or
-pnpm add tailwind-fluid
+pnpm add fluid-tailwindcss
 # or
-yarn add tailwind-fluid
+yarn add fluid-tailwindcss
 ```
 
 ## Quick Start
@@ -33,7 +33,7 @@ TailwindCSS v4 uses a CSS-first approach. Add the plugin using the `@plugin` dir
 ```css
 /* app.css */
 @import "tailwindcss";
-@plugin "tailwind-fluid";
+@plugin "fluid-tailwindcss";
 ```
 
 ### 2. Use fluid utilities in your HTML
@@ -64,11 +64,11 @@ While this plugin is primarily designed for TailwindCSS v4, it can also work wit
 Since the package specifies `tailwindcss ^4.0.0` as a peer dependency, you'll need to install with the `--legacy-peer-deps` flag:
 
 ```bash
-npm install tailwind-fluid --legacy-peer-deps
+npm install fluid-tailwindcss --legacy-peer-deps
 # or
-pnpm add tailwind-fluid --ignore-peer-deps
+pnpm add fluid-tailwindcss --ignore-peer-deps
 # or
-yarn add tailwind-fluid --ignore-engines
+yarn add fluid-tailwindcss --ignore-engines
 ```
 
 ### Configuration for v3
@@ -83,7 +83,7 @@ module.exports = {
     extend: {},
   },
   plugins: [
-    require('tailwind-fluid')({
+    require('fluid-tailwindcss')({
       minViewport: 375,
       maxViewport: 1440,
       useRem: true,
@@ -152,7 +152,7 @@ The plugin uses these defaults:
 
 ```css
 @import "tailwindcss";
-@plugin "tailwind-fluid" {
+@plugin "fluid-tailwindcss" {
   minViewport: 320;
   maxViewport: 1920;
 }
@@ -172,7 +172,7 @@ If you need JavaScript-based configuration, you can use the `@config` directive 
 // tailwind.config.js
 module.exports = {
   plugins: [
-    require('tailwind-fluid')({
+    require('fluid-tailwindcss')({
       minViewport: 320,
       maxViewport: 1920,
       useRem: true,
@@ -262,7 +262,7 @@ The package includes first-class support for `tailwind-merge`. This ensures flui
 ### Basic Usage
 
 ```javascript
-import { twMerge } from 'tailwind-fluid/tailwind-merge'
+import { twMerge } from 'fluid-tailwindcss/tailwind-merge'
 
 // Fluid utility wins (last one)
 twMerge('p-4', 'fl-p-4/8')  // => 'fl-p-4/8'
@@ -278,7 +278,7 @@ twMerge('fl-p-4/8', 'fl-m-2/6', 'text-lg')  // => 'fl-p-4/8 fl-m-2/6 text-lg'
 
 ```javascript
 import { extendTailwindMerge } from 'tailwind-merge'
-import { withFluid } from 'tailwind-fluid/tailwind-merge'
+import { withFluid } from 'fluid-tailwindcss/tailwind-merge'
 
 const twMerge = extendTailwindMerge(withFluid, {
   // Your additional config
@@ -288,7 +288,7 @@ const twMerge = extendTailwindMerge(withFluid, {
 ### Creating a Custom Instance
 
 ```javascript
-import { createTwMerge } from 'tailwind-fluid/tailwind-merge'
+import { createTwMerge } from 'fluid-tailwindcss/tailwind-merge'
 
 const twMerge = createTwMerge({
   // Additional tailwind-merge config
@@ -347,7 +347,7 @@ The plugin includes accessibility checks for typography utilities. When `checkAc
 To disable accessibility checks:
 
 ```css
-@plugin "tailwind-fluid" {
+@plugin "fluid-tailwindcss" {
   checkAccessibility: false;
 }
 ```
@@ -399,7 +399,7 @@ For older browser support, consider using a PostCSS plugin like [postcss-clamp](
 The package is written in TypeScript and includes full type definitions. Import types as needed:
 
 ```typescript
-import type { FluidOptions, ResolvedFluidOptions } from 'tailwind-fluid'
+import type { FluidOptions, ResolvedFluidOptions } from 'fluid-tailwindcss'
 ```
 
 ## Contributing
