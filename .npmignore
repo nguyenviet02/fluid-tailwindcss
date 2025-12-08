@@ -1,0 +1,24 @@
+# Source files (published via dist)
+src/
+tests/
+
+# Config files
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+
+# Dev files
+.gitignore
+.npmignore
+
+# IDE
+.vscode/
+.idea/
+
+# Tests
+*.test.ts
+coverage/
+
+# Node modules (handled by npm)
+node_modules/
+

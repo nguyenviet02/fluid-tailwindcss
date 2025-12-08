@@ -1,0 +1,75 @@
+{
+  "name": "tailwind-fluid",
+  "version": "1.0.0",
+  "description": "Build better responsive designs in less code using CSS clamp() for TailwindCSS v4",
+  "author": "IceteaAI",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./tailwind-merge": {
+      "import": {
+        "types": "./dist/tailwind-merge/index.d.ts",
+        "default": "./dist/tailwind-merge/index.js"
+      },
+      "require": {
+        "types": "./dist/tailwind-merge/index.d.cts",
+        "default": "./dist/tailwind-merge/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "tailwindcss",
+    "tailwind",
+    "plugin",
+    "fluid",
+    "responsive",
+    "clamp",
+    "typography",
+    "spacing",
+    "css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IceteaAI/tailwind-fluid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/IceteaAI/tailwind-fluid/issues"
+  },
+  "homepage": "https://github.com/IceteaAI/tailwind-fluid#readme",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tailwind-merge": "^2.2.0",
+    "tailwindcss": "^4.0.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}
+
