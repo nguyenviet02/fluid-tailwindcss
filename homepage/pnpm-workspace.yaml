@@ -1,3 +1,0 @@
-overrides:
-  fluid-tailwindcss: link:../../../../.local/share/pnpm/global/5/node_modules/fluid-tailwindcss
-  tailwind-fluid: link:../../../../.local/share/pnpm/global/5/node_modules/tailwind-fluid
