@@ -1,6 +1,6 @@
 {
   "name": "fluid-tailwindcss",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Build better responsive designs in less code using CSS clamp() for TailwindCSS v4",
   "author": "nguyenviet02",
   "license": "MIT",
@@ -51,7 +51,7 @@
   "bugs": {
     "url": "https://github.com/nguyenviet02/fluid-tailwindcss/issues"
   },
-  "homepage": "https://github.com/nguyenviet02/fluid-tailwindcss#readme",
+  "homepage": "https://fluid-tailwindcss.vercel.app",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
