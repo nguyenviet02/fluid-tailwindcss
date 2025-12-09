@@ -1,5 +1,17 @@
 import { describe, it, expect } from 'vitest'
-import { twMerge, isFluidValue, withFluid, createTwMerge } from '../src/tailwind-merge'
+import { 
+  twMerge, 
+  isFluidValue, 
+  withFluid, 
+  createTwMerge,
+  isArbitraryFluidValue,
+  isAnyFluidValue,
+  isNegativeFluidValue,
+  createPrefixedTwMerge,
+  validateFluidClass,
+  filterValidFluidClasses,
+  twMergeWithValidation,
+} from '../src/tailwind-merge'
 
 describe('isFluidValue', () => {
   it('should match valid fluid value patterns', () => {
@@ -141,6 +153,144 @@ describe('createTwMerge', () => {
       },
     })
     expect(typeof customMerge).toBe('function')
+  })
+})
+
+describe('isArbitraryFluidValue', () => {
+  it('should match arbitrary fluid values', () => {
+    expect(isArbitraryFluidValue('[1rem/2rem]')).toBe(true)
+    expect(isArbitraryFluidValue('[16px/32px]')).toBe(true)
+    expect(isArbitraryFluidValue('[1.5rem/2.5rem]')).toBe(true)
+  })
+
+  it('should not match standard fluid values', () => {
+    expect(isArbitraryFluidValue('4/8')).toBe(false)
+    expect(isArbitraryFluidValue('base/2xl')).toBe(false)
+  })
+
+  it('should not match invalid patterns', () => {
+    expect(isArbitraryFluidValue('[1rem]')).toBe(false)
+    expect(isArbitraryFluidValue('1rem/2rem')).toBe(false)
+  })
+})
+
+describe('isAnyFluidValue', () => {
+  it('should match standard fluid values', () => {
+    expect(isAnyFluidValue('4/8')).toBe(true)
+    expect(isAnyFluidValue('base/2xl')).toBe(true)
+  })
+
+  it('should match arbitrary fluid values', () => {
+    expect(isAnyFluidValue('[1rem/2rem]')).toBe(true)
+    expect(isAnyFluidValue('[16px/32px]')).toBe(true)
+  })
+
+  it('should not match invalid values', () => {
+    expect(isAnyFluidValue('4')).toBe(false)
+    expect(isAnyFluidValue('')).toBe(false)
+  })
+})
+
+describe('isNegativeFluidValue', () => {
+  it('should match negative fluid values', () => {
+    expect(isNegativeFluidValue('-4/8')).toBe(true)
+    expect(isNegativeFluidValue('-base/2xl')).toBe(true)
+  })
+
+  it('should match negative arbitrary values', () => {
+    expect(isNegativeFluidValue('-[1rem/2rem]')).toBe(true)
+  })
+
+  it('should not match positive values', () => {
+    expect(isNegativeFluidValue('4/8')).toBe(false)
+    expect(isNegativeFluidValue('[1rem/2rem]')).toBe(false)
+  })
+})
+
+describe('createPrefixedTwMerge', () => {
+  it('should create merge function without prefix', () => {
+    const merge = createPrefixedTwMerge()
+    expect(typeof merge).toBe('function')
+  })
+
+  it('should create merge function with custom prefix', () => {
+    const merge = createPrefixedTwMerge({ prefix: 'tw-' })
+    expect(typeof merge).toBe('function')
+  })
+})
+
+describe('validateFluidClass', () => {
+  it('should validate standard fluid classes', () => {
+    const result = validateFluidClass('fl-p-4/8')
+    expect(result.valid).toBe(true)
+  })
+
+  it('should validate arbitrary fluid classes', () => {
+    const result = validateFluidClass('fl-p-[1rem/2rem]')
+    expect(result.valid).toBe(true)
+  })
+
+  it('should detect unit mismatch in arbitrary values', () => {
+    const result = validateFluidClass('fl-p-[1rem/16px]')
+    expect(result.valid).toBe(false)
+    expect(result.reason).toContain('mismatch')
+  })
+
+  it('should pass non-fluid classes', () => {
+    const result = validateFluidClass('p-4')
+    expect(result.valid).toBe(true)
+  })
+})
+
+describe('filterValidFluidClasses', () => {
+  it('should keep valid fluid classes', () => {
+    const result = filterValidFluidClasses('fl-p-4/8 fl-m-2/6')
+    expect(result).toBe('fl-p-4/8 fl-m-2/6')
+  })
+
+  it('should remove invalid fluid classes', () => {
+    const result = filterValidFluidClasses('fl-p-[1rem/16px] fl-m-2/6')
+    expect(result).toBe('fl-m-2/6')
+  })
+
+  it('should keep non-fluid classes', () => {
+    const result = filterValidFluidClasses('p-4 m-2 text-lg')
+    expect(result).toBe('p-4 m-2 text-lg')
+  })
+})
+
+describe('twMergeWithValidation', () => {
+  it('should merge valid classes', () => {
+    const result = twMergeWithValidation('fl-p-4/8', 'fl-p-6/12')
+    expect(result).toBe('fl-p-6/12')
+  })
+
+  it('should filter out invalid classes before merging', () => {
+    const result = twMergeWithValidation('fl-p-[1rem/16px]', 'fl-m-4/8')
+    expect(result).toBe('fl-m-4/8')
+    expect(result).not.toContain('fl-p')
+  })
+
+  it('should handle mixed valid and invalid classes', () => {
+    const result = twMergeWithValidation('p-4', 'fl-p-[1rem/16px]', 'fl-m-4/8')
+    expect(result).toBe('p-4 fl-m-4/8')
+  })
+
+  it('should handle falsy values', () => {
+    const result = twMergeWithValidation('fl-p-4/8', undefined, null, false)
+    expect(result).toBe('fl-p-4/8')
+  })
+})
+
+describe('negative values with twMerge', () => {
+  it('should handle negative margin classes', () => {
+    const result = twMerge('-fl-m-4/8', '-fl-m-6/12')
+    expect(result).toBe('-fl-m-6/12')
+  })
+
+  it('should handle negative translate classes', () => {
+    const result = twMerge('-fl-translate-x-4/8', 'fl-translate-x-2/6')
+    expect(result).toBe('fl-translate-x-2/6')
   })
 })
 

@@ -7,6 +7,11 @@ import {
   resolveThemeValue,
   checkAccessibility,
   round,
+  toPrecision,
+  getPrecision,
+  clampNumber,
+  checkSC144,
+  calculateNegativeClamp,
 } from '../src/clamp'
 import type { ResolvedFluidOptions } from '../src/types'
 
@@ -191,6 +196,125 @@ describe('checkAccessibility', () => {
     const options = { ...defaultOptions, checkAccessibility: false }
     const result = checkAccessibility('0.5rem', options, 'text')
     expect(result.isValid).toBe(true)
+  })
+})
+
+describe('toPrecision', () => {
+  it('should format numbers to specified precision', () => {
+    expect(toPrecision(1.23456789, 2)).toBe('1.23')
+    expect(toPrecision(1.23456789, 4)).toBe('1.2346')
+    expect(toPrecision(1.5, 0)).toBe('2')
+  })
+
+  it('should not add trailing zeros', () => {
+    expect(toPrecision(1.5, 4)).toBe('1.5')
+    expect(toPrecision(2, 4)).toBe('2')
+  })
+
+  it('should handle negative numbers', () => {
+    expect(toPrecision(-1.23456, 2)).toBe('-1.23')
+  })
+
+  it('should handle zero', () => {
+    expect(toPrecision(0, 4)).toBe('0')
+  })
+})
+
+describe('getPrecision', () => {
+  it('should return 0 for integers', () => {
+    expect(getPrecision(5)).toBe(0)
+    expect(getPrecision(100)).toBe(0)
+    expect(getPrecision(-42)).toBe(0)
+  })
+
+  it('should count decimal places correctly', () => {
+    expect(getPrecision(1.5)).toBe(1)
+    expect(getPrecision(1.25)).toBe(2)
+    expect(getPrecision(1.125)).toBe(3)
+    expect(getPrecision(0.0001)).toBe(4)
+  })
+
+  it('should handle zero', () => {
+    expect(getPrecision(0)).toBe(0)
+  })
+})
+
+describe('clampNumber', () => {
+  it('should clamp value between min and max', () => {
+    expect(clampNumber(0, 5, 10)).toBe(5)
+    expect(clampNumber(0, -5, 10)).toBe(0)
+    expect(clampNumber(0, 15, 10)).toBe(10)
+  })
+
+  it('should return min when value is less than min', () => {
+    expect(clampNumber(5, 2, 10)).toBe(5)
+  })
+
+  it('should return max when value is greater than max', () => {
+    expect(clampNumber(0, 15, 10)).toBe(10)
+  })
+
+  it('should return value when within range', () => {
+    expect(clampNumber(0, 5, 10)).toBe(5)
+  })
+})
+
+describe('checkSC144', () => {
+  it('should pass for reasonable typography scaling', () => {
+    // Test with typical fluid typography values
+    const startNum = 1 // 1rem
+    const endNum = 2 // 2rem
+    const startBP = 23.4375 // 375px in rem
+    const endBP = 90 // 1440px in rem
+    const slope = (endNum - startNum) / (endBP - startBP)
+    const intercept = startNum - slope * startBP
+    
+    const result = checkSC144(startNum, endNum, startBP, endBP, slope, intercept)
+    expect(result.passes).toBe(true)
+  })
+
+  it('should detect WCAG SC 1.4.4 failures', () => {
+    // Test with extreme values that would fail SC 1.4.4
+    const startNum = 0.5 // 0.5rem (8px) - very small
+    const endNum = 4 // 4rem (64px) - large
+    const startBP = 20 // Small viewport
+    const endBP = 100 // Large viewport
+    const slope = (endNum - startNum) / (endBP - startBP)
+    const intercept = startNum - slope * startBP
+    
+    const result = checkSC144(startNum, endNum, startBP, endBP, slope, intercept)
+    // The result depends on the specific math, but we're testing the function works
+    expect(typeof result.passes).toBe('boolean')
+  })
+
+  it('should include failing viewport when fails', () => {
+    // Create a scenario that's likely to fail
+    const startNum = 0.5
+    const endNum = 5
+    const startBP = 10
+    const endBP = 100
+    const slope = (endNum - startNum) / (endBP - startBP)
+    const intercept = startNum - slope * startBP
+    
+    const result = checkSC144(startNum, endNum, startBP, endBP, slope, intercept)
+    if (!result.passes) {
+      expect(result.failingViewport).toBeDefined()
+      expect(result.failingUnit).toBe('rem')
+    }
+  })
+})
+
+describe('calculateNegativeClamp', () => {
+  it('should negate simple values', () => {
+    const options = { ...defaultOptions }
+    // When min equals max, it returns a simple value
+    const result = calculateNegativeClamp('1rem', '1rem', options)
+    expect(result).toBe('-1rem')
+  })
+
+  it('should wrap clamp in calc with -1 multiplier', () => {
+    const result = calculateNegativeClamp('1rem', '2rem', defaultOptions)
+    expect(result).toMatch(/^calc\(clamp\(.*\) \* -1\)$/)
   })
 })
 

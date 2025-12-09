@@ -1,3 +1,6 @@
+import type { Length } from './length'
+import type { FluidError } from './errors'
+
 /**
  * Configuration options for the fluid-tailwindcss plugin
  */
@@ -31,6 +34,36 @@ export interface FluidOptions {
    * @default true
    */
   checkAccessibility?: boolean
+
+  /**
+   * Custom prefix for fluid utilities (e.g., 'tw-' would make 'tw-fl-p-4/8')
+   * @default ''
+   */
+  prefix?: string
+
+  /**
+   * Custom separator for modifiers
+   * @default ':'
+   */
+  separator?: string
+
+  /**
+   * Whether to use container query units (cqw) instead of viewport units (vw)
+   * @default false
+   */
+  useContainerQuery?: boolean
+
+  /**
+   * Whether to add debug comments in CSS output
+   * @default false
+   */
+  debug?: boolean
+
+  /**
+   * Whether to validate units before calculation
+   * @default true
+   */
+  validateUnits?: boolean
 }
 
 /**
@@ -42,6 +75,41 @@ export interface ResolvedFluidOptions {
   useRem: boolean
   rootFontSize: number
   checkAccessibility: boolean
+  prefix: string
+  separator: string
+  useContainerQuery: boolean
+  debug: boolean
+  validateUnits: boolean
+}
+
+/**
+ * Per-utility breakpoint configuration
+ * Allows customizing breakpoints for individual utilities
+ */
+export interface PerUtilityBreakpoints {
+  minViewport?: number
+  maxViewport?: number
+}
+
+/**
+ * Result of validation operation
+ */
+export interface ValidationResult {
+  valid: boolean
+  error?: FluidError
+  warning?: string
+}
+
+/**
+ * Parsed and validated fluid value pair
+ */
+export interface FluidValuePair {
+  min: Length
+  max: Length
+  minKey: string
+  maxKey: string
+  minResolved: string
+  maxResolved: string
 }
 
 /**
@@ -89,5 +157,22 @@ export interface PluginAPI {
   ) => void
   theme: (path: string, defaultValue?: unknown) => unknown
   config: (path: string, defaultValue?: unknown) => unknown
+}
+
+/**
+ * WCAG SC 1.4.4 check result
+ */
+export interface SC144CheckResult {
+  passes: boolean
+  failingViewport?: number
+  failingUnit?: string
+}
+
+/**
+ * Accessibility check result
+ */
+export interface AccessibilityCheckResult {
+  isValid: boolean
+  warning?: string
 }
 

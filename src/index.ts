@@ -1,17 +1,77 @@
 import plugin from 'tailwindcss/plugin'
 import type { FluidOptions, ResolvedFluidOptions, CssInJs, PluginAPI } from './types'
 import {
-  calculateClamp,
+  calculateClampAdvanced,
   parseFluidString,
   resolveThemeValue,
   checkAccessibility,
+  validateFluidUnits,
 } from './clamp'
 import { fluidUtilities, getThemePath, getDefaultScale } from './utilities'
+import { parseArbitraryValue } from './validation'
 
 // Re-export types for consumers
-export type { FluidOptions, ResolvedFluidOptions, FluidValue, UtilityDefinition, CssInJs } from './types'
-export { calculateClamp, parseFluidString, resolveThemeValue } from './clamp'
+export type { 
+  FluidOptions, 
+  ResolvedFluidOptions, 
+  FluidValue, 
+  UtilityDefinition, 
+  CssInJs,
+  SC144CheckResult,
+  AccessibilityCheckResult,
+  ValidationResult,
+  FluidValuePair,
+  PerUtilityBreakpoints,
+} from './types'
+
+// Export clamp utilities
+export { 
+  calculateClamp, 
+  parseFluidString, 
+  resolveThemeValue,
+  toPrecision,
+  getPrecision,
+  clampNumber,
+  checkSC144,
+  checkAccessibility,
+  calculateNegativeClamp,
+  // Advanced clamp functions
+  calculateClampAdvanced,
+  validateFluidUnits,
+  createNegatedClamp,
+  createContainerClamp,
+} from './clamp'
+
+// Export utility definitions
 export { fluidUtilities, getDefaultScale } from './utilities'
+
+// Export Length class for advanced usage
+export { Length } from './length'
+export type { RawValue } from './length'
+
+// Export error handling utilities
+export { 
+  FluidError, 
+  errorCodes, 
+  throwError,
+  ok,
+  err,
+} from './errors'
+export type { ErrorCode, FluidResult } from './errors'
+
+// Export validation utilities
+export {
+  validateUnitsMatch,
+  validateBreakpointsCompatible,
+  validateValuesAreDifferent,
+  validateFluidPair,
+  parseAndValidateFluidPair,
+  isSupportedUnit,
+  isArbitraryValue,
+  parseArbitraryValue,
+  createDebugComment,
+  SUPPORTED_UNITS,
+} from './validation'
 
 /**
  * Default plugin options
@@ -22,6 +82,11 @@ const defaultOptions: ResolvedFluidOptions = {
   useRem: true,
   rootFontSize: 16,
   checkAccessibility: true,
+  prefix: '',
+  separator: ':',
+  useContainerQuery: false,
+  debug: false,
+  validateUnits: true,
 }
 
 /**
@@ -116,41 +181,111 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
           continue
         }
 
-        // Register the utility with matchUtilities
-        // Note: supportsNegativeValues handles negative values automatically in Tailwind v4
-        // e.g., -fl-m-4/8 will work when supportsNegativeValues is true
-        matchUtilities(
-          {
-            [utilityName]: (value: string, _extra: { modifier: string | null }): CssInJs => {
-              const parsed = parseFluidString(value)
-              if (!parsed) return {}
+        // Build the utility name with optional prefix
+        const fullUtilityName = resolvedOptions.prefix 
+          ? `${resolvedOptions.prefix}${utilityName}`
+          : utilityName
 
-              // Resolve theme values
-              const minResolved = resolveThemeValue(parsed.min, themeValues)
-              const maxResolved = resolveThemeValue(parsed.max, themeValues)
-
-              if (!minResolved || !maxResolved) return {}
-
-              // Check accessibility for typography
-              if (utilityName === 'fl-text') {
-                const { warning } = checkAccessibility(minResolved, resolvedOptions, 'text')
-                if (warning) {
-                  console.warn(`[fluid-tailwindcss] ${warning}`)
+        // Create utility handler function
+        const createUtilityHandler = (negate: boolean) => {
+          return (value: string, _extra: { modifier: string | null }): CssInJs => {
+            // Handle arbitrary values like [1rem/2rem]
+            const arbitraryValue = parseArbitraryValue(value)
+            if (arbitraryValue) {
+              const arbitraryParsed = parseFluidString(arbitraryValue)
+              if (!arbitraryParsed) return {}
+              
+              // Validate units match for arbitrary values
+              if (resolvedOptions.validateUnits) {
+                const validation = validateFluidUnits(
+                  arbitraryParsed.min, 
+                  arbitraryParsed.max, 
+                  resolvedOptions.rootFontSize
+                )
+                if (!validation.valid) {
+                  console.warn(`[fluid-tailwindcss] ${validation.error?.message}`)
+                  return {}
                 }
               }
 
-              // Calculate the clamp value
-              const clampValue = calculateClamp(minResolved, maxResolved, resolvedOptions)
+              const { result } = calculateClampAdvanced(
+                arbitraryParsed.min, 
+                arbitraryParsed.max, 
+                resolvedOptions,
+                { negate }
+              )
+              return createFluidDeclaration(utilityDef.property, result)
+            }
 
-              // Create the CSS declaration
-              return createFluidDeclaration(utilityDef.property, clampValue)
-            },
+            const parsed = parseFluidString(value)
+            if (!parsed) return {}
+
+            // Resolve theme values
+            const minResolved = resolveThemeValue(parsed.min, themeValues)
+            const maxResolved = resolveThemeValue(parsed.max, themeValues)
+
+            if (!minResolved || !maxResolved) return {}
+
+            // Validate units match if validation is enabled
+            if (resolvedOptions.validateUnits) {
+              const validation = validateFluidUnits(
+                minResolved, 
+                maxResolved, 
+                resolvedOptions.rootFontSize
+              )
+              if (!validation.valid) {
+                console.warn(`[fluid-tailwindcss] ${validation.error?.message}`)
+                return {}
+              }
+            }
+
+            // Check accessibility for typography
+            if (utilityName === 'fl-text') {
+              const { warning } = checkAccessibility(minResolved, resolvedOptions, 'text')
+              if (warning) {
+                console.warn(`[fluid-tailwindcss] ${warning}`)
+              }
+            }
+
+            // Calculate the clamp value using advanced function for debug support
+            const { result: clampValue } = calculateClampAdvanced(
+              minResolved, 
+              maxResolved, 
+              resolvedOptions,
+              { negate }
+            )
+
+            // Create the CSS declaration
+            return createFluidDeclaration(utilityDef.property, clampValue)
+          }
+        }
+
+        // Register the positive utility
+        matchUtilities(
+          {
+            [fullUtilityName]: createUtilityHandler(false),
           },
           {
             values: fluidValues,
-            supportsNegativeValues: utilityDef.supportsNegative ?? false,
           }
         )
+
+        // Register the negative utility with "neg" prefix if supported
+        // Tailwind v4 doesn't allow utility names starting with "-"
+        // So we use "neg-fl-*" instead of "-fl-*" for negative utilities
+        // Users should use: neg-fl-m-4/8 instead of -fl-m-4/8
+        if (utilityDef.supportsNegative) {
+          // Create negative version with "neg-" prefix: neg-fl-m, neg-fl-mt, etc.
+          const negativeUtilityName = `neg-${fullUtilityName}`
+          matchUtilities(
+            {
+              [negativeUtilityName]: createUtilityHandler(true),
+            },
+            {
+              values: fluidValues,
+            }
+          )
+        }
       }
     }
   },
@@ -174,25 +309,89 @@ function registerSpaceUtility(
   const isX = utilityName === 'fl-space-x'
   const marginProp = isX ? 'margin-left' : 'margin-top'
 
-  matchUtilities(
-    {
-      [utilityName]: (value: string, _extra: { modifier: string | null }): CssInJs => {
-        const parsed = parseFluidString(value)
-        if (!parsed) return {}
+  // Build the utility name with optional prefix
+  const fullUtilityName = resolvedOptions.prefix 
+    ? `${resolvedOptions.prefix}${utilityName}`
+    : utilityName
 
-        const minResolved = resolveThemeValue(parsed.min, themeValues)
-        const maxResolved = resolveThemeValue(parsed.max, themeValues)
+  // Create space utility handler
+  const createSpaceHandler = (negate: boolean) => {
+    return (value: string, _extra: { modifier: string | null }): CssInJs => {
+      // Handle arbitrary values
+      const arbitraryValue = parseArbitraryValue(value)
+      if (arbitraryValue) {
+        const arbitraryParsed = parseFluidString(arbitraryValue)
+        if (!arbitraryParsed) return {}
+        
+        if (resolvedOptions.validateUnits) {
+          const validation = validateFluidUnits(
+            arbitraryParsed.min, 
+            arbitraryParsed.max, 
+            resolvedOptions.rootFontSize
+          )
+          if (!validation.valid) return {}
+        }
 
-        if (!minResolved || !maxResolved) return {}
-
-        const clampValue = calculateClamp(minResolved, maxResolved, resolvedOptions)
-
+        const { result } = calculateClampAdvanced(
+          arbitraryParsed.min, 
+          arbitraryParsed.max, 
+          resolvedOptions,
+          { negate }
+        )
         return {
           '& > :not([hidden]) ~ :not([hidden])': {
-            [marginProp]: clampValue,
+            [marginProp]: result,
           },
         }
-      },
+      }
+
+      const parsed = parseFluidString(value)
+      if (!parsed) return {}
+
+      const minResolved = resolveThemeValue(parsed.min, themeValues)
+      const maxResolved = resolveThemeValue(parsed.max, themeValues)
+
+      if (!minResolved || !maxResolved) return {}
+
+      if (resolvedOptions.validateUnits) {
+        const validation = validateFluidUnits(
+          minResolved, 
+          maxResolved, 
+          resolvedOptions.rootFontSize
+        )
+        if (!validation.valid) return {}
+      }
+
+      const { result: clampValue } = calculateClampAdvanced(
+        minResolved, 
+        maxResolved, 
+        resolvedOptions,
+        { negate }
+      )
+
+      return {
+        '& > :not([hidden]) ~ :not([hidden])': {
+          [marginProp]: clampValue,
+        },
+      }
+    }
+  }
+
+  // Register positive utility
+  matchUtilities(
+    {
+      [fullUtilityName]: createSpaceHandler(false),
+    },
+    {
+      values: fluidValues,
+    }
+  )
+
+  // Register negative utility with "neg-" prefix
+  const negativeUtilityName = `neg-${fullUtilityName}`
+  matchUtilities(
+    {
+      [negativeUtilityName]: createSpaceHandler(true),
     },
     {
       values: fluidValues,
@@ -211,30 +410,94 @@ function registerTranslateUtility(
   resolvedOptions: ResolvedFluidOptions,
   matchUtilities: PluginAPI['matchUtilities']
 ) {
-  matchUtilities(
-    {
-      [utilityName]: (value: string, _extra: { modifier: string | null }): CssInJs => {
-        const parsed = parseFluidString(value)
-        if (!parsed) return {}
+  // Build the utility name with optional prefix
+  const fullUtilityName = resolvedOptions.prefix 
+    ? `${resolvedOptions.prefix}${utilityName}`
+    : utilityName
 
-        const minResolved = resolveThemeValue(parsed.min, themeValues)
-        const maxResolved = resolveThemeValue(parsed.max, themeValues)
+  // Create translate utility handler
+  const createTranslateHandler = (negate: boolean) => {
+    return (value: string, _extra: { modifier: string | null }): CssInJs => {
+      // Handle arbitrary values
+      const arbitraryValue = parseArbitraryValue(value)
+      if (arbitraryValue) {
+        const arbitraryParsed = parseFluidString(arbitraryValue)
+        if (!arbitraryParsed) return {}
+        
+        if (resolvedOptions.validateUnits) {
+          const validation = validateFluidUnits(
+            arbitraryParsed.min, 
+            arbitraryParsed.max, 
+            resolvedOptions.rootFontSize
+          )
+          if (!validation.valid) return {}
+        }
 
-        if (!minResolved || !maxResolved) return {}
-
-        const clampValue = calculateClamp(minResolved, maxResolved, resolvedOptions)
-
+        const { result } = calculateClampAdvanced(
+          arbitraryParsed.min, 
+          arbitraryParsed.max, 
+          resolvedOptions,
+          { negate }
+        )
         return {
-          [utilityDef.property as string]: clampValue,
+          [utilityDef.property as string]: result,
           transform: `translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))`,
         }
-      },
+      }
+
+      const parsed = parseFluidString(value)
+      if (!parsed) return {}
+
+      const minResolved = resolveThemeValue(parsed.min, themeValues)
+      const maxResolved = resolveThemeValue(parsed.max, themeValues)
+
+      if (!minResolved || !maxResolved) return {}
+
+      if (resolvedOptions.validateUnits) {
+        const validation = validateFluidUnits(
+          minResolved, 
+          maxResolved, 
+          resolvedOptions.rootFontSize
+        )
+        if (!validation.valid) return {}
+      }
+
+      const { result: clampValue } = calculateClampAdvanced(
+        minResolved, 
+        maxResolved, 
+        resolvedOptions,
+        { negate }
+      )
+
+      return {
+        [utilityDef.property as string]: clampValue,
+        transform: `translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))`,
+      }
+    }
+  }
+
+  // Register positive utility
+  matchUtilities(
+    {
+      [fullUtilityName]: createTranslateHandler(false),
     },
     {
       values: fluidValues,
-      supportsNegativeValues: utilityDef.supportsNegative ?? false,
     }
   )
+
+  // Register negative utility with "neg-" prefix if supported
+  if (utilityDef.supportsNegative) {
+    const negativeUtilityName = `neg-${fullUtilityName}`
+    matchUtilities(
+      {
+        [negativeUtilityName]: createTranslateHandler(true),
+      },
+      {
+        values: fluidValues,
+      }
+    )
+  }
 }
 
 // Export the plugin as default

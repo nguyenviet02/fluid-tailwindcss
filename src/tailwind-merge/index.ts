@@ -8,10 +8,43 @@ import type { Config } from 'tailwind-merge'
 const fluidValuePattern = /^[\w.-]+\/[\w.-]+$/
 
 /**
+ * Regex pattern for arbitrary fluid values: [min/max] format
+ * Matches: [1rem/2rem], [16px/32px], etc.
+ */
+const arbitraryFluidValuePattern = /^\[[\w.]+\/[\w.]+\]$/
+
+/**
  * Creates a validator function for fluid class values
  */
 export function isFluidValue(value: string): boolean {
   return fluidValuePattern.test(value)
+}
+
+/**
+ * Validates arbitrary fluid values like [1rem/2rem]
+ */
+export function isArbitraryFluidValue(value: string): boolean {
+  return arbitraryFluidValuePattern.test(value)
+}
+
+/**
+ * Combined validator for both standard and arbitrary fluid values
+ */
+export function isAnyFluidValue(value: string): boolean {
+  return isFluidValue(value) || isArbitraryFluidValue(value)
+}
+
+/**
+ * Validates negative fluid values (values starting with '-')
+ * Note: In Tailwind v4, negative utilities use 'neg-fl-*' prefix instead of '-fl-*'
+ * This function checks for the value format, not the utility prefix
+ */
+export function isNegativeFluidValue(value: string): boolean {
+  // Handle negative prefix on the value itself (legacy format)
+  if (value.startsWith('-')) {
+    return isFluidValue(value.slice(1)) || isArbitraryFluidValue(value.slice(1))
+  }
+  return false
 }
 
 /**
@@ -51,16 +84,16 @@ export const withFluid = {
       'fluid-ps': [{ 'fl-ps': [isFluidValue] }],
       'fluid-pe': [{ 'fl-pe': [isFluidValue] }],
 
-      // Margin utilities
-      'fluid-m': [{ 'fl-m': [isFluidValue] }],
-      'fluid-mx': [{ 'fl-mx': [isFluidValue] }],
-      'fluid-my': [{ 'fl-my': [isFluidValue] }],
-      'fluid-mt': [{ 'fl-mt': [isFluidValue] }],
-      'fluid-mr': [{ 'fl-mr': [isFluidValue] }],
-      'fluid-mb': [{ 'fl-mb': [isFluidValue] }],
-      'fluid-ml': [{ 'fl-ml': [isFluidValue] }],
-      'fluid-ms': [{ 'fl-ms': [isFluidValue] }],
-      'fluid-me': [{ 'fl-me': [isFluidValue] }],
+      // Margin utilities (includes negative variants with 'neg-' prefix)
+      'fluid-m': [{ 'fl-m': [isFluidValue] }, { 'neg-fl-m': [isFluidValue] }],
+      'fluid-mx': [{ 'fl-mx': [isFluidValue] }, { 'neg-fl-mx': [isFluidValue] }],
+      'fluid-my': [{ 'fl-my': [isFluidValue] }, { 'neg-fl-my': [isFluidValue] }],
+      'fluid-mt': [{ 'fl-mt': [isFluidValue] }, { 'neg-fl-mt': [isFluidValue] }],
+      'fluid-mr': [{ 'fl-mr': [isFluidValue] }, { 'neg-fl-mr': [isFluidValue] }],
+      'fluid-mb': [{ 'fl-mb': [isFluidValue] }, { 'neg-fl-mb': [isFluidValue] }],
+      'fluid-ml': [{ 'fl-ml': [isFluidValue] }, { 'neg-fl-ml': [isFluidValue] }],
+      'fluid-ms': [{ 'fl-ms': [isFluidValue] }, { 'neg-fl-ms': [isFluidValue] }],
+      'fluid-me': [{ 'fl-me': [isFluidValue] }, { 'neg-fl-me': [isFluidValue] }],
 
       // Typography utilities
       'fluid-text': [{ 'fl-text': [isFluidValue] }],
@@ -81,16 +114,16 @@ export const withFluid = {
       'fluid-gap-x': [{ 'fl-gap-x': [isFluidValue] }],
       'fluid-gap-y': [{ 'fl-gap-y': [isFluidValue] }],
 
-      // Position utilities
-      'fluid-inset': [{ 'fl-inset': [isFluidValue] }],
-      'fluid-inset-x': [{ 'fl-inset-x': [isFluidValue] }],
-      'fluid-inset-y': [{ 'fl-inset-y': [isFluidValue] }],
-      'fluid-top': [{ 'fl-top': [isFluidValue] }],
-      'fluid-right': [{ 'fl-right': [isFluidValue] }],
-      'fluid-bottom': [{ 'fl-bottom': [isFluidValue] }],
-      'fluid-left': [{ 'fl-left': [isFluidValue] }],
-      'fluid-start': [{ 'fl-start': [isFluidValue] }],
-      'fluid-end': [{ 'fl-end': [isFluidValue] }],
+      // Position utilities (includes negative variants with 'neg-' prefix)
+      'fluid-inset': [{ 'fl-inset': [isFluidValue] }, { 'neg-fl-inset': [isFluidValue] }],
+      'fluid-inset-x': [{ 'fl-inset-x': [isFluidValue] }, { 'neg-fl-inset-x': [isFluidValue] }],
+      'fluid-inset-y': [{ 'fl-inset-y': [isFluidValue] }, { 'neg-fl-inset-y': [isFluidValue] }],
+      'fluid-top': [{ 'fl-top': [isFluidValue] }, { 'neg-fl-top': [isFluidValue] }],
+      'fluid-right': [{ 'fl-right': [isFluidValue] }, { 'neg-fl-right': [isFluidValue] }],
+      'fluid-bottom': [{ 'fl-bottom': [isFluidValue] }, { 'neg-fl-bottom': [isFluidValue] }],
+      'fluid-left': [{ 'fl-left': [isFluidValue] }, { 'neg-fl-left': [isFluidValue] }],
+      'fluid-start': [{ 'fl-start': [isFluidValue] }, { 'neg-fl-start': [isFluidValue] }],
+      'fluid-end': [{ 'fl-end': [isFluidValue] }, { 'neg-fl-end': [isFluidValue] }],
 
       // Border utilities
       'fluid-rounded': [{ 'fl-rounded': [isFluidValue] }],
@@ -108,13 +141,13 @@ export const withFluid = {
       'fluid-border-b': [{ 'fl-border-b': [isFluidValue] }],
       'fluid-border-l': [{ 'fl-border-l': [isFluidValue] }],
 
-      // Space utilities
-      'fluid-space-x': [{ 'fl-space-x': [isFluidValue] }],
-      'fluid-space-y': [{ 'fl-space-y': [isFluidValue] }],
+      // Space utilities (includes negative variants with 'neg-' prefix)
+      'fluid-space-x': [{ 'fl-space-x': [isFluidValue] }, { 'neg-fl-space-x': [isFluidValue] }],
+      'fluid-space-y': [{ 'fl-space-y': [isFluidValue] }, { 'neg-fl-space-y': [isFluidValue] }],
 
-      // Translate utilities
-      'fluid-translate-x': [{ 'fl-translate-x': [isFluidValue] }],
-      'fluid-translate-y': [{ 'fl-translate-y': [isFluidValue] }],
+      // Translate utilities (includes negative variants with 'neg-' prefix)
+      'fluid-translate-x': [{ 'fl-translate-x': [isFluidValue] }, { 'neg-fl-translate-x': [isFluidValue] }],
+      'fluid-translate-y': [{ 'fl-translate-y': [isFluidValue] }, { 'neg-fl-translate-y': [isFluidValue] }],
 
       // Basis
       'fluid-basis': [{ 'fl-basis': [isFluidValue] }],
@@ -336,4 +369,160 @@ export function createTwMerge(
   
   // Just return with fluid config
   return extendTailwindMerge(withFluid as unknown as Config<FluidClassGroupIds, string>)
+}
+
+/**
+ * Configuration options for creating custom prefix-aware fluid merge
+ */
+export interface FluidMergeOptions {
+  /** Custom prefix for fluid utilities (e.g., 'tw-' would match 'tw-fl-p-4/8') */
+  prefix?: string
+  /** Custom separator (default: ':') */
+  separator?: string
+}
+
+/**
+ * Creates a tailwind-merge configuration with custom prefix support
+ * Based on fluid-tailwind's approach to handling custom prefixes
+ */
+export function createFluidMergeConfig(options: FluidMergeOptions = {}) {
+  const { prefix = '' } = options
+
+  // Generate class groups with custom prefix
+  const generateClassGroups = () => {
+    const utilities = [
+      // Padding
+      ['fluid-p', 'fl-p'], ['fluid-px', 'fl-px'], ['fluid-py', 'fl-py'],
+      ['fluid-pt', 'fl-pt'], ['fluid-pr', 'fl-pr'], ['fluid-pb', 'fl-pb'],
+      ['fluid-pl', 'fl-pl'], ['fluid-ps', 'fl-ps'], ['fluid-pe', 'fl-pe'],
+      // Margin
+      ['fluid-m', 'fl-m'], ['fluid-mx', 'fl-mx'], ['fluid-my', 'fl-my'],
+      ['fluid-mt', 'fl-mt'], ['fluid-mr', 'fl-mr'], ['fluid-mb', 'fl-mb'],
+      ['fluid-ml', 'fl-ml'], ['fluid-ms', 'fl-ms'], ['fluid-me', 'fl-me'],
+      // Typography
+      ['fluid-text', 'fl-text'], ['fluid-leading', 'fl-leading'], ['fluid-tracking', 'fl-tracking'],
+      // Sizing
+      ['fluid-w', 'fl-w'], ['fluid-h', 'fl-h'], ['fluid-size', 'fl-size'],
+      ['fluid-min-w', 'fl-min-w'], ['fluid-max-w', 'fl-max-w'],
+      ['fluid-min-h', 'fl-min-h'], ['fluid-max-h', 'fl-max-h'],
+      // Gap
+      ['fluid-gap', 'fl-gap'], ['fluid-gap-x', 'fl-gap-x'], ['fluid-gap-y', 'fl-gap-y'],
+      // Position
+      ['fluid-inset', 'fl-inset'], ['fluid-inset-x', 'fl-inset-x'], ['fluid-inset-y', 'fl-inset-y'],
+      ['fluid-top', 'fl-top'], ['fluid-right', 'fl-right'], ['fluid-bottom', 'fl-bottom'],
+      ['fluid-left', 'fl-left'], ['fluid-start', 'fl-start'], ['fluid-end', 'fl-end'],
+      // Border
+      ['fluid-rounded', 'fl-rounded'], ['fluid-rounded-t', 'fl-rounded-t'],
+      ['fluid-rounded-r', 'fl-rounded-r'], ['fluid-rounded-b', 'fl-rounded-b'],
+      ['fluid-rounded-l', 'fl-rounded-l'], ['fluid-rounded-tl', 'fl-rounded-tl'],
+      ['fluid-rounded-tr', 'fl-rounded-tr'], ['fluid-rounded-br', 'fl-rounded-br'],
+      ['fluid-rounded-bl', 'fl-rounded-bl'], ['fluid-border', 'fl-border'],
+      ['fluid-border-t', 'fl-border-t'], ['fluid-border-r', 'fl-border-r'],
+      ['fluid-border-b', 'fl-border-b'], ['fluid-border-l', 'fl-border-l'],
+      // Space
+      ['fluid-space-x', 'fl-space-x'], ['fluid-space-y', 'fl-space-y'],
+      // Translate
+      ['fluid-translate-x', 'fl-translate-x'], ['fluid-translate-y', 'fl-translate-y'],
+      // Basis
+      ['fluid-basis', 'fl-basis'],
+      // Scroll
+      ['fluid-scroll-m', 'fl-scroll-m'], ['fluid-scroll-mx', 'fl-scroll-mx'],
+      ['fluid-scroll-my', 'fl-scroll-my'], ['fluid-scroll-mt', 'fl-scroll-mt'],
+      ['fluid-scroll-mr', 'fl-scroll-mr'], ['fluid-scroll-mb', 'fl-scroll-mb'],
+      ['fluid-scroll-ml', 'fl-scroll-ml'], ['fluid-scroll-p', 'fl-scroll-p'],
+      ['fluid-scroll-px', 'fl-scroll-px'], ['fluid-scroll-py', 'fl-scroll-py'],
+      ['fluid-scroll-pt', 'fl-scroll-pt'], ['fluid-scroll-pr', 'fl-scroll-pr'],
+      ['fluid-scroll-pb', 'fl-scroll-pb'], ['fluid-scroll-pl', 'fl-scroll-pl'],
+    ] as const
+
+    const classGroups: Record<string, Array<Record<string, Array<(val: string) => boolean>>>> = {}
+    
+    for (const [groupId, utilityName] of utilities) {
+      const prefixedName = prefix ? `${prefix}${utilityName}` : utilityName
+      classGroups[groupId] = [{ [prefixedName]: [isAnyFluidValue] }]
+      
+      // Also add negative variants for utilities that support it
+      // Tailwind v4 uses 'neg-fl-*' pattern instead of '-fl-*'
+      const negativeUtilities = ['fl-m', 'fl-mx', 'fl-my', 'fl-mt', 'fl-mr', 'fl-mb', 'fl-ml',
+        'fl-ms', 'fl-me', 'fl-inset', 'fl-inset-x', 'fl-inset-y', 'fl-top', 'fl-right',
+        'fl-bottom', 'fl-left', 'fl-start', 'fl-end', 'fl-translate-x', 'fl-translate-y',
+        'fl-space-x', 'fl-space-y']
+      
+      if (negativeUtilities.includes(utilityName)) {
+        const negativePrefixedName = prefix ? `neg-${prefix}${utilityName}` : `neg-${utilityName}`
+        classGroups[groupId].push({ [negativePrefixedName]: [isAnyFluidValue] })
+      }
+    }
+
+    return classGroups
+  }
+
+  return {
+    extend: {
+      classGroups: generateClassGroups(),
+    },
+  }
+}
+
+/**
+ * Creates a tailwind-merge instance with custom prefix support
+ */
+export function createPrefixedTwMerge(options: FluidMergeOptions = {}) {
+  const config = createFluidMergeConfig(options)
+  return extendTailwindMerge(config as unknown as Config<FluidClassGroupIds, string>)
+}
+
+/**
+ * Validates that a fluid class has matching units in its value
+ * Useful for runtime validation in custom merge logic
+ */
+export function validateFluidClass(className: string): { valid: boolean; reason?: string } {
+  // Extract the value part from class like "fl-p-4/8" -> "4/8"
+  const match = className.match(/fl-[\w-]+-(.+)$/)
+  if (!match) return { valid: true } // Not a fluid class
+
+  const value = match[1]
+  
+  // Check if it's an arbitrary value
+  if (value.startsWith('[') && value.endsWith(']')) {
+    const inner = value.slice(1, -1)
+    const parts = inner.split('/')
+    if (parts.length !== 2) {
+      return { valid: false, reason: 'Invalid arbitrary value format' }
+    }
+    // Check for unit mismatch (basic check)
+    const [min, max] = parts
+    const minUnit = min.replace(/[0-9.-]/g, '')
+    const maxUnit = max.replace(/[0-9.-]/g, '')
+    if (minUnit && maxUnit && minUnit !== maxUnit) {
+      return { valid: false, reason: `Unit mismatch: ${minUnit} vs ${maxUnit}` }
+    }
+  }
+
+  return { valid: true }
+}
+
+/**
+ * Filters out invalid fluid classes from a class string
+ * Returns only valid classes
+ */
+export function filterValidFluidClasses(classString: string): string {
+  return classString
+    .split(/\s+/)
+    .filter(cls => {
+      if (!cls.includes('fl-')) return true // Keep non-fluid classes
+      return validateFluidClass(cls).valid
+    })
+    .join(' ')
+}
+
+/**
+ * Merges classes with validation, optionally removing invalid fluid classes
+ */
+export function twMergeWithValidation(
+  ...classLists: Array<string | undefined | null | false>
+): string {
+  const combined = classLists.filter(Boolean).join(' ')
+  const filtered = filterValidFluidClasses(combined)
+  return twMerge(filtered)
 }
