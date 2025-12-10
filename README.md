@@ -418,6 +418,13 @@ Contributions are welcome! Please read the contributing guidelines before submit
 
 MIT License - see [LICENSE](LICENSE) for details.
 
+## Blog Posts
+
+Learn more about the development journey and technical details:
+
+- [Part 1: Building Fluid Responsive Designs in TailwindCSS v4 — How I Created fluid-tailwindcss](https://medium.com/@nguyenviet02.dev/building-fluid-responsive-designs-in-tailwindcss-v4-how-i-created-fluid-tailwindcss-cbd5f833a953)
+- [Part 2: The Dark Side of TailwindCSS v4 Plugins — Why neg-fl- Exists and Advanced Features](https://medium.com/@nguyenviet02.dev/part-2-the-dark-side-of-tailwindcss-v4-plugins-why-neg-fl-exists-and-advanced-a8902d08131)
+
 ## Credits
 
 Inspired by:
