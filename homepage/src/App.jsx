@@ -45,6 +45,31 @@ export default function App() {
               <p className="fl-text-xs/sm text-slate-600 fl-mt-2/3">
                 fluid-tailwindcss • MIT License
               </p>
+              
+              {/* Blog Posts */}
+              <div className="fl-mt-6/8">
+                <p className="fl-text-xs/sm text-slate-500 fl-mb-2/3">Read about the development journey:</p>
+                <div className="flex flex-col sm:flex-row justify-center fl-gap-2/3">
+                  <a 
+                    href="https://medium.com/@nguyenviet02.dev/building-fluid-responsive-designs-in-tailwindcss-v4-how-i-created-fluid-tailwindcss-cbd5f833a953" 
+                    className="fl-text-xs/sm text-cyan-400 hover:text-cyan-300 transition-colors underline underline-offset-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Part 1: How I Created fluid-tailwindcss
+                  </a>
+                  <span className="hidden sm:inline text-slate-600">•</span>
+                  <a 
+                    href="https://medium.com/@nguyenviet02.dev/part-2-the-dark-side-of-tailwindcss-v4-plugins-why-neg-fl-exists-and-advanced-a8902d08131" 
+                    className="fl-text-xs/sm text-cyan-400 hover:text-cyan-300 transition-colors underline underline-offset-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Part 2: Why neg-fl- Exists
+                  </a>
+                </div>
+              </div>
+
               <div className="flex justify-center fl-gap-4/6 fl-mt-4/6">
                 <a 
                   href="https://github.com/nguyenviet02/fluid-tailwindcss" 
