@@ -118,7 +118,7 @@ export default function Configuration() {
       <div className="bg-amber-500/5 border border-amber-500/20 fl-rounded-lg/xl fl-p-4/6">
         <div className="flex fl-gap-3/4">
           <span className="fl-text-lg/xl">⚠️</span>
-          <div>
+          <div className='flex-1'>
             <h4 className="fl-text-sm/base font-medium text-amber-300 fl-mb-1/2">
               JavaScript Configuration (Legacy)
             </h4>
