@@ -1,10 +1,12 @@
-import CodeBlock, { InlineCode } from './CodeBlock'
+import CodeBlock, { InlineCode } from "./CodeBlock";
 
 export default function Integrations() {
   return (
     <section id="integrations" className="fl-mb-12/20 scroll-mt-6">
-      <h2 className="fl-text-xl/3xl font-semibold text-white fl-mb-4/6">Integrations</h2>
-      
+      <h2 className="fl-text-xl/3xl font-semibold text-white fl-mb-4/6">
+        Integrations
+      </h2>
+
       <p className="fl-text-sm/base text-slate-400 fl-mb-6/8">
         First-class support for popular Tailwind ecosystem tools.
       </p>
@@ -18,8 +20,8 @@ export default function Integrations() {
         <p className="fl-text-sm/base text-slate-400 fl-mb-4/6">
           Proper conflict resolution between fluid and regular utilities.
         </p>
-        
-        <div className="grid lg:grid-cols-2 fl-gap-4/6 fl-mb-4/6">
+
+        <div className="grid lg:grid-cols-2 fl-gap-4/6 fl-mb-4/6 min-w-0">
           <CodeBlock
             language="javascript"
             title="Basic Usage"
@@ -37,7 +39,7 @@ twMerge('fl-p-4/8', 'p-4')
 twMerge('fl-p-4/8', 'fl-m-2/6', 'text-lg')
 // => 'fl-p-4/8 fl-m-2/6 text-lg'`}
           />
-          <div className="fl-space-y-4/6">
+          <div className="fl-space-y-4/6 min-w-0">
             <CodeBlock
               language="javascript"
               title="Extend Your Own"
@@ -61,9 +63,11 @@ const twMerge = createTwMerge({
         </div>
 
         {/* Conflict resolution examples */}
-        <div className="bg-slate-900/50 border border-orange-800/30 fl-rounded-lg/xl fl-p-4/6">
-          <h4 className="fl-text-sm/base font-medium text-orange-300 fl-mb-3/4">Conflict Resolution Examples</h4>
-          <div className="fl-space-y-2/3 fl-text-xs/sm font-mono">
+        <div className="bg-slate-900/50 border border-orange-800/30 fl-rounded-lg/xl fl-p-4/6 overflow-x-auto code-scrollbar">
+          <h4 className="fl-text-sm/base font-medium text-orange-300 fl-mb-3/4">
+            Conflict Resolution Examples
+          </h4>
+          <div className="fl-space-y-2/3 fl-text-xs/sm font-mono min-w-max">
             <div className="flex items-center fl-gap-2/3">
               <span className="text-slate-400">twMerge("p-4", "fl-p-4/8")</span>
               <span className="text-emerald-400">→</span>
@@ -97,7 +101,7 @@ const twMerge = createTwMerge({
         <p className="fl-text-sm/base text-slate-400 fl-mb-4/6">
           Programmatically validate fluid class names:
         </p>
-        
+
         <CodeBlock
           language="javascript"
           title="Validation API"
@@ -126,29 +130,37 @@ twMergeWithValidation('p-4', 'fl-p-4/8')
           IntelliSense Support
         </h3>
         <p className="fl-text-sm/base text-slate-400 fl-mb-4/6">
-          The plugin automatically works with the official Tailwind CSS IntelliSense extension.
+          The plugin automatically works with the official Tailwind CSS
+          IntelliSense extension.
         </p>
-        
+
         <div className="bg-slate-900/50 border border-violet-800/30 fl-rounded-lg/xl fl-p-4/6">
           <div className="flex items-start fl-gap-3/4">
             <div className="fl-text-2xl/3xl">💡</div>
             <div>
-              <h4 className="fl-text-sm/base font-medium text-violet-300 fl-mb-1/2">VS Code Setup</h4>
+              <h4 className="fl-text-sm/base font-medium text-violet-300 fl-mb-1/2">
+                VS Code Setup
+              </h4>
               <p className="fl-text-xs/sm text-slate-400 fl-mb-2/3">
-                Install the{' '}
-                <a 
-                  href="https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss" 
-                  target="_blank" 
+                Install the{" "}
+                <a
+                  href="https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
                 >
                   Tailwind CSS IntelliSense
-                </a>{' '}
+                </a>{" "}
                 extension for autocomplete with generated CSS values.
               </p>
               <ul className="fl-text-xs/sm text-slate-400 fl-space-y-1/1.5">
-                <li>• All <InlineCode>fl-*</InlineCode> utilities appear in autocomplete</li>
-                <li>• Preview generated <InlineCode>clamp()</InlineCode> values</li>
+                <li>
+                  • All <InlineCode>fl-*</InlineCode> utilities appear in
+                  autocomplete
+                </li>
+                <li>
+                  • Preview generated <InlineCode>clamp()</InlineCode> values
+                </li>
                 <li>• Works with arbitrary values</li>
               </ul>
             </div>
@@ -165,10 +177,12 @@ twMergeWithValidation('p-4', 'fl-p-4/8')
         <p className="fl-text-sm/base text-slate-400 fl-mb-4/6">
           All internal utilities are exported for custom implementations:
         </p>
-        
+
         <div className="grid md:grid-cols-2 lg:grid-cols-3 fl-gap-4/6">
           <div className="bg-slate-900/50 border border-slate-800 fl-rounded-lg/xl fl-p-3/5">
-            <h4 className="fl-text-sm/base font-medium text-cyan-400 fl-mb-2/3">Clamp Functions</h4>
+            <h4 className="fl-text-sm/base font-medium text-cyan-400 fl-mb-2/3">
+              Clamp Functions
+            </h4>
             <ul className="fl-space-y-0.5/1 fl-text-xs/sm text-slate-400">
               <li>• calculateClamp</li>
               <li>• calculateClampAdvanced</li>
@@ -177,7 +191,9 @@ twMergeWithValidation('p-4', 'fl-p-4/8')
             </ul>
           </div>
           <div className="bg-slate-900/50 border border-slate-800 fl-rounded-lg/xl fl-p-3/5">
-            <h4 className="fl-text-sm/base font-medium text-violet-400 fl-mb-2/3">Validation</h4>
+            <h4 className="fl-text-sm/base font-medium text-violet-400 fl-mb-2/3">
+              Validation
+            </h4>
             <ul className="fl-space-y-0.5/1 fl-text-xs/sm text-slate-400">
               <li>• validateFluidUnits</li>
               <li>• validateUnitsMatch</li>
@@ -186,7 +202,9 @@ twMergeWithValidation('p-4', 'fl-p-4/8')
             </ul>
           </div>
           <div className="bg-slate-900/50 border border-slate-800 fl-rounded-lg/xl fl-p-3/5">
-            <h4 className="fl-text-sm/base font-medium text-emerald-400 fl-mb-2/3">Utilities</h4>
+            <h4 className="fl-text-sm/base font-medium text-emerald-400 fl-mb-2/3">
+              Utilities
+            </h4>
             <ul className="fl-space-y-0.5/1 fl-text-xs/sm text-slate-400">
               <li>• Length class</li>
               <li>• FluidError class</li>
@@ -197,6 +215,5 @@ twMergeWithValidation('p-4', 'fl-p-4/8')
         </div>
       </div>
     </section>
-  )
+  );
 }
-
