@@ -18,14 +18,14 @@ export default function CodeBlock({
   const lines = code.split('\n')
 
   return (
-    <div className={`relative group ${className}`}>
+    <div className={`relative group min-w-0 ${className}`}>
       {title && (
         <div className="flex items-center justify-between bg-slate-800/80 border-b border-slate-700/50 fl-px-3/5 fl-py-1.5/2.5 rounded-t-lg">
           <span className="fl-text-xs/sm font-medium text-slate-400">{title}</span>
           <span className="fl-text-[10px]/xs text-slate-500 uppercase tracking-wider">{language}</span>
         </div>
       )}
-      <div className={`relative bg-slate-900/80 backdrop-blur-sm border border-slate-800 fl-p-3/5 overflow-x-auto ${title ? 'rounded-b-lg border-t-0' : 'fl-rounded-md/lg'}`}>
+      <div className={`relative bg-slate-900/80 backdrop-blur-sm border border-slate-800 fl-p-3/5 overflow-x-auto code-scrollbar ${title ? 'rounded-b-lg border-t-0' : 'fl-rounded-md/lg'}`}>
         <button
           onClick={handleCopy}
           className="absolute fl-top-2/3 fl-right-2/3 fl-p-1.5/2 rounded-md bg-slate-800/80 hover:bg-slate-700 border border-slate-700/50 text-slate-400 hover:text-slate-200 opacity-0 group-hover:opacity-100 transition-all duration-200"
@@ -41,7 +41,7 @@ export default function CodeBlock({
             </svg>
           )}
         </button>
-        <pre className="fl-text-xs/sm leading-relaxed">
+        <pre className="fl-text-xs/sm leading-relaxed overflow-x-auto code-scrollbar">
           <code className="text-slate-300">
             {showLineNumbers ? (
               lines.map((line, i) => (

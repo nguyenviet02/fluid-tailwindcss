@@ -1,2 +1,27 @@
 @import "tailwindcss";
 @plugin "fluid-tailwindcss";
+
+/* Custom scrollbar for code blocks */
+.code-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.code-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.code-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+.code-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Firefox */
+.code-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
