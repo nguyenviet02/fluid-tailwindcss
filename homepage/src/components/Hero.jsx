@@ -4,7 +4,7 @@ export default function Hero() {
       {/* Badge */}
       <div className="flex items-center fl-gap-2/3 fl-mb-4/6">
         <span className="fl-text-xs/sm font-medium text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 fl-px-2.5/3.5 fl-py-1/1.5 rounded-full">
-          v1.0.3
+          v1.0.5
         </span>
         <span className="fl-text-xs/sm text-slate-500">
           TailwindCSS v4 Ready
