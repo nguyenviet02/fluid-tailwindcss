@@ -3,6 +3,8 @@ import type { FluidError } from './errors'
 
 /**
  * Configuration options for the fluid-tailwindcss plugin
+ * Note: Both camelCase and lowercase variants are supported
+ * (Prettier may convert camelCase to lowercase in CSS @plugin blocks)
  */
 export interface FluidOptions {
   /**
@@ -10,30 +12,40 @@ export interface FluidOptions {
    * @default 375
    */
   minViewport?: number
+  /** @deprecated Use minViewport instead. Lowercase variant for Prettier compatibility. */
+  minviewport?: number
 
   /**
    * Maximum viewport width in pixels where fluid scaling ends
    * @default 1440
    */
   maxViewport?: number
+  /** @deprecated Use maxViewport instead. Lowercase variant for Prettier compatibility. */
+  maxviewport?: number
 
   /**
    * Whether to use rem units (true) or px units (false)
    * @default true
    */
   useRem?: boolean
+  /** @deprecated Use useRem instead. Lowercase variant for Prettier compatibility. */
+  userem?: boolean
 
   /**
    * Root font size in pixels (used when useRem is true)
    * @default 16
    */
   rootFontSize?: number
+  /** @deprecated Use rootFontSize instead. Lowercase variant for Prettier compatibility. */
+  rootfontsize?: number
 
   /**
    * Whether to show accessibility warnings for small font sizes
    * @default true
    */
   checkAccessibility?: boolean
+  /** @deprecated Use checkAccessibility instead. Lowercase variant for Prettier compatibility. */
+  checkaccessibility?: boolean
 
   /**
    * Custom prefix for fluid utilities (e.g., 'tw-' would make 'tw-fl-p-4/8')
@@ -52,6 +64,8 @@ export interface FluidOptions {
    * @default false
    */
   useContainerQuery?: boolean
+  /** @deprecated Use useContainerQuery instead. Lowercase variant for Prettier compatibility. */
+  usecontainerquery?: boolean
 
   /**
    * Whether to add debug comments in CSS output
@@ -64,6 +78,8 @@ export interface FluidOptions {
    * @default true
    */
   validateUnits?: boolean
+  /** @deprecated Use validateUnits instead. Lowercase variant for Prettier compatibility. */
+  validateunits?: boolean
 }
 
 /**
