@@ -90,12 +90,46 @@ const defaultOptions: ResolvedFluidOptions = {
 }
 
 /**
+ * Normalizes options by converting lowercase variants to camelCase
+ * This handles Prettier converting camelCase to lowercase in CSS @plugin blocks
+ */
+function normalizeOptions(options: FluidOptions): FluidOptions {
+  const normalized: FluidOptions = { ...options }
+  
+  // Map lowercase variants to camelCase
+  if (options.minviewport !== undefined && options.minViewport === undefined) {
+    normalized.minViewport = options.minviewport
+  }
+  if (options.maxviewport !== undefined && options.maxViewport === undefined) {
+    normalized.maxViewport = options.maxviewport
+  }
+  if (options.userem !== undefined && options.useRem === undefined) {
+    normalized.useRem = options.userem
+  }
+  if (options.rootfontsize !== undefined && options.rootFontSize === undefined) {
+    normalized.rootFontSize = options.rootfontsize
+  }
+  if (options.checkaccessibility !== undefined && options.checkAccessibility === undefined) {
+    normalized.checkAccessibility = options.checkaccessibility
+  }
+  if (options.usecontainerquery !== undefined && options.useContainerQuery === undefined) {
+    normalized.useContainerQuery = options.usecontainerquery
+  }
+  if (options.validateunits !== undefined && options.validateUnits === undefined) {
+    normalized.validateUnits = options.validateunits
+  }
+  
+  return normalized
+}
+
+/**
  * Resolves user options with defaults
  */
 function resolveOptions(options: FluidOptions = {}): ResolvedFluidOptions {
+  const normalized = normalizeOptions(options)
   return {
     ...defaultOptions,
-    ...options,
+    ...normalized,
   }
 }
 
