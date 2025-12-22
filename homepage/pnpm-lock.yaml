@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  fluid-tailwindcss: link:../../../../.local/share/pnpm/global/5/node_modules/fluid-tailwindcss
+
 importers:
 
   .:
@@ -12,8 +15,8 @@ importers:
         specifier: ^4.1.17
         version: 4.1.17(vite@7.2.7(jiti@2.6.1)(lightningcss@1.30.2))
       fluid-tailwindcss:
-        specifier: 1.0.3
-        version: 1.0.3(tailwindcss@4.1.17)
+        specifier: link:../../../../.local/share/pnpm/global/5/node_modules/fluid-tailwindcss
+        version: link:../../../../.local/share/pnpm/global/5/node_modules/fluid-tailwindcss
       react:
         specifier: ^19.2.0
         version: 19.2.1
@@ -785,11 +788,6 @@ packages:
 
   flatted@3.3.3:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
-
-  fluid-tailwindcss@1.0.3:
-    resolution: {integrity: sha512-k/aRNgYUsb+n5b+Ml0SGVQXUctTcYk6HEbkan4VxJ81pNcO5J4VJLjz9LgR8/+2R3kw35P0DyoAkWANnXgTttw==}
-    peerDependencies:
-      tailwindcss: ^4.0.0
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -1834,10 +1832,6 @@ snapshots:
       keyv: 4.5.4
 
   flatted@3.3.3: {}
-
-  fluid-tailwindcss@1.0.3(tailwindcss@4.1.17):
-    dependencies:
-      tailwindcss: 4.1.17
 
   fsevents@2.3.3:
     optional: true

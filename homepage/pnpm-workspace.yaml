@@ -1,0 +1,2 @@
+overrides:
+  fluid-tailwindcss: link:../../../../.local/share/pnpm/global/5/node_modules/fluid-tailwindcss
