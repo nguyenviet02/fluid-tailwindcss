@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
     "fluid-tailwindcss": "1.0.3",
+    "fluid-taiwindcss": "link:../../../../Library/pnpm/global/5/node_modules/fluid-taiwindcss",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.1.17"
