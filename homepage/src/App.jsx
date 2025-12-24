@@ -10,12 +10,12 @@ import Troubleshooting from './components/Troubleshooting'
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Background gradient effect */}
       <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pointer-events-none" />
       <div className="fixed top-0 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
-      
+
       {/* Main layout */}
       <div className="relative max-w-7xl mx-auto fl-px-4/8 fl-py-8/16">
         <div className="flex fl-gap-8/16">
@@ -23,7 +23,7 @@ export default function App() {
           <aside className="hidden lg:block shrink-0">
             <Sidebar />
           </aside>
-          
+
           {/* Main content */}
           <main className="flex-1 min-w-0">
             <Hero />
@@ -36,7 +36,7 @@ export default function App() {
               <Limitations />
               <Troubleshooting />
             </div>
-            
+
             {/* Footer */}
             <footer className="border-t border-slate-800 fl-pt-8/12 fl-mt-8/16 text-center">
               <p className="fl-text-sm/base text-slate-500">
@@ -45,13 +45,13 @@ export default function App() {
               <p className="fl-text-xs/sm text-slate-600 fl-mt-2/3">
                 fluid-tailwindcss • MIT License
               </p>
-              
+
               {/* Blog Posts */}
               <div className="fl-mt-6/8">
                 <p className="fl-text-xs/sm text-slate-500 fl-mb-2/3">Read about the development journey:</p>
                 <div className="flex flex-col sm:flex-row justify-center fl-gap-2/3">
-                  <a 
-                    href="https://medium.com/@nguyenviet02.dev/building-fluid-responsive-designs-in-tailwindcss-v4-how-i-created-fluid-tailwindcss-cbd5f833a953" 
+                  <a
+                    href="https://medium.com/@nguyenviet02.dev/building-fluid-responsive-designs-in-tailwindcss-v4-how-i-created-fluid-tailwindcss-cbd5f833a953"
                     className="fl-text-xs/sm text-cyan-400 hover:text-cyan-300 transition-colors underline underline-offset-2"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -59,8 +59,8 @@ export default function App() {
                     Part 1: How I Created fluid-tailwindcss
                   </a>
                   <span className="hidden sm:inline text-slate-600">•</span>
-                  <a 
-                    href="https://medium.com/@nguyenviet02.dev/part-2-the-dark-side-of-tailwindcss-v4-plugins-why-neg-fl-exists-and-advanced-a8902d08131" 
+                  <a
+                    href="https://medium.com/@nguyenviet02.dev/part-2-the-dark-side-of-tailwindcss-v4-plugins-why-neg-fl-exists-and-advanced-a8902d08131"
                     className="fl-text-xs/sm text-cyan-400 hover:text-cyan-300 transition-colors underline underline-offset-2"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -71,16 +71,16 @@ export default function App() {
               </div>
 
               <div className="flex justify-center fl-gap-4/6 fl-mt-4/6">
-                <a 
-                  href="https://github.com/nguyenviet02/fluid-tailwindcss" 
+                <a
+                  href="https://github.com/nguyenviet02/fluid-tailwindcss"
                   className="fl-text-xs/sm text-slate-500 hover:text-cyan-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   GitHub
                 </a>
-                <a 
-                  href="https://www.npmjs.com/package/fluid-tailwindcss" 
+                <a
+                  href="https://www.npmjs.com/package/fluid-tailwindcss"
                   className="fl-text-xs/sm text-slate-500 hover:text-cyan-400 transition-colors"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -92,7 +92,7 @@ export default function App() {
           </main>
         </div>
       </div>
-      
+
       {/* Mobile navigation */}
       <MobileNav />
     </div>
@@ -128,8 +128,8 @@ function NavLink({ href, label }) {
   }
 
   return (
-    <a 
-      href={href} 
+    <a
+      href={href}
       onClick={handleClick}
       className="fl-text-xs/sm text-slate-400 hover:text-white fl-px-2/3 fl-py-1/2 transition-colors"
     >
