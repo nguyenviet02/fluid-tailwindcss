@@ -9,6 +9,7 @@ import {
 } from './clamp'
 import { fluidUtilities, getThemePath, getDefaultScale } from './utilities'
 import { parseArbitraryValue } from './validation'
+import { Length } from './length'
 
 // Re-export types for consumers
 export type { 
@@ -134,32 +135,111 @@ function resolveOptions(options: FluidOptions = {}): ResolvedFluidOptions {
 }
 
 /**
- * Generates fluid utility values by combining all theme values
+ * Keys that should never participate in fluid value pair generation.
+ */
+const SKIP_KEYS = new Set(['DEFAULT', 'none', 'full'])
+
+/**
+ * Extracts the CSS unit from a theme value.
+ *
+ * Handles plain strings ("1rem", "16px"), Tailwind v4 fontSize objects,
+ * and the [fontSize, lineHeight] array format.
+ * Returns null when the value cannot be parsed to a recognised unit.
+ */
+function extractUnit(value: unknown): string | null {
+  if (typeof value === 'string') {
+    const parsed = Length.parse(value.trim())
+    if (parsed?.unit) return parsed.unit
+    return null
+  }
+
+  // Tailwind fontSize values can be arrays: ["1.5rem", { lineHeight: "2rem" }]
+  if (Array.isArray(value) && value.length > 0) {
+    return extractUnit(value[0])
+  }
+
+  // Tailwind v4 may wrap values in objects: { fontSize: "1rem", lineHeight: "1.5" }
+  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+    const obj = value as Record<string, unknown>
+    for (const prop of ['fontSize', 'value', 'size']) {
+      if (typeof obj[prop] === 'string') return extractUnit(obj[prop])
+    }
+  }
+
+  return null
+}
+
+/**
+ * Generates fluid utility values by combining all theme values.
  * Format: "minValue/maxValue" pairs like "4/8" or "base/2xl"
+ *
+ * Only pairs whose resolved values share the same CSS unit are included.
+ * This prevents the combinatorial explosion of warnings that previously
+ * occurred when the theme scale contained mixed units (e.g. the `px` key
+ * at "1px" alongside all the rem-based spacing values), which caused
+ * thousands of console.warn() calls per IntelliSense reload.
  */
 function generateFluidValues(
-  scaleValues: Record<string, unknown>
+  scaleValues: Record<string, unknown>,
+  debug = false
 ): Record<string, string> {
   const values: Record<string, string> = {}
-
-  // Generate all possible min/max combinations
   const keys = Object.keys(scaleValues)
 
-  for (const minKey of keys) {
-    for (const maxKey of keys) {
-      // Skip if min equals max
-      if (minKey === maxKey) continue
+  // ── 1. Resolve units for every key up-front (O(n) not O(n²)) ──────────
+  const unitByKey = new Map<string, string>()
+  const unparsableKeys: string[] = []
 
-      // Skip DEFAULT key in combinations (use it directly if needed)
-      if (minKey === 'DEFAULT' || maxKey === 'DEFAULT') continue
+  for (const key of keys) {
+    if (SKIP_KEYS.has(key)) continue
 
-      // Skip combinations that don't make sense (like 'none' for border-radius)
-      if (minKey === 'none' || maxKey === 'none') continue
-      if (minKey === 'full' || maxKey === 'full') continue
+    const unit = extractUnit(scaleValues[key])
+    if (unit) {
+      unitByKey.set(key, unit)
+    } else {
+      unparsableKeys.push(key)
+    }
+  }
 
-      // Create the fluid value key
-      const fluidKey = `${minKey}/${maxKey}`
-      values[fluidKey] = fluidKey
+  // ── 2. Group keys by unit so we only combine compatible pairs ──────────
+  const keysByUnit = new Map<string, string[]>()
+  for (const [key, unit] of unitByKey) {
+    let group = keysByUnit.get(unit)
+    if (!group) {
+      group = []
+      keysByUnit.set(unit, group)
+    }
+    group.push(key)
+  }
+
+  // ── 3. One-time summary warnings (debug mode only) ────────────────────
+  if (debug) {
+    if (keysByUnit.size > 1) {
+      const unitSummary = [...keysByUnit.entries()]
+        .map(([unit, group]) => `${unit} (${group.length} values)`)
+        .join(', ')
+      console.warn(
+        `[fluid-tailwindcss] Theme scale contains mixed units: ${unitSummary}. ` +
+        `Cross-unit pairs have been excluded.`
+      )
+    }
+    if (unparsableKeys.length > 0) {
+      console.warn(
+        `[fluid-tailwindcss] Could not determine unit for theme keys: ` +
+        `${unparsableKeys.join(', ')}. These keys are excluded from fluid value generation.`
+      )
+    }
+  }
+
+  // ── 4. Generate pairs only within same-unit groups ─────────────────────
+  for (const group of keysByUnit.values()) {
+    for (const minKey of group) {
+      for (const maxKey of group) {
+        if (minKey === maxKey) continue
+
+        const fluidKey = `${minKey}/${maxKey}`
+        values[fluidKey] = fluidKey
+      }
     }
   }
 
@@ -199,8 +279,8 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
         // Tailwind v4 can return objects for some theme values (like fontSize)
         const themeValues = (theme(themePath) as Record<string, unknown>) ?? getDefaultScale(utilityDef.scale)
         
-        // Generate fluid value combinations
-        const fluidValues = generateFluidValues(themeValues)
+        // Generate fluid value combinations (pre-filtered by unit compatibility)
+        const fluidValues = generateFluidValues(themeValues, resolvedOptions.debug)
 
         // Handle special utilities that need custom logic
         if (utilityName === 'fl-space-x' || utilityName === 'fl-space-y') {
@@ -261,6 +341,9 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             if (!minResolved || !maxResolved) return {}
 
             // Validate units match if validation is enabled
+            // With pre-filtered generateFluidValues() this should rarely fire
+            // for theme-based pairs, but still catches edge cases where the
+            // resolved value differs from what extractUnit() predicted.
             if (resolvedOptions.validateUnits) {
               const validation = validateFluidUnits(
                 minResolved, 
@@ -268,7 +351,9 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
                 resolvedOptions.rootFontSize
               )
               if (!validation.valid) {
-                console.warn(`[fluid-tailwindcss] ${validation.error?.message}`)
+                if (resolvedOptions.debug) {
+                  console.warn(`[fluid-tailwindcss] ${validation.error?.message}`)
+                }
                 return {}
               }
             }
