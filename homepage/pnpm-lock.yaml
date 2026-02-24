@@ -12,8 +12,8 @@ dependencies:
     specifier: ^1.6.1
     version: 1.6.1(react@19.2.4)
   fluid-tailwindcss:
-    specifier: 1.0.8
-    version: 1.0.8(tailwindcss@4.2.1)
+    specifier: 1.0.9
+    version: 1.0.9(tailwindcss@4.2.1)
   react:
     specifier: ^19.2.0
     version: 19.2.4
@@ -1427,8 +1427,8 @@ packages:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
     dev: true
 
-  /fluid-tailwindcss@1.0.8(tailwindcss@4.2.1):
-    resolution: {integrity: sha512-+ZHp2A4Fp2tT8T6iWqTwRlpquzkO7hQM6xmo7f3AnyyPYuXuUX9JvOTtJcIApxobC01ViX8qU4dXVvnNlzU+Ow==}
+  /fluid-tailwindcss@1.0.9(tailwindcss@4.2.1):
+    resolution: {integrity: sha512-lmtVb/ehau/3wAgnrBlI828zBvUk2rpf66ptzn1Phk/LyuiNswUFIKiSYYxaMLgNPxL7m1RXWJCdPBwmvjvGvQ==}
     peerDependencies:
       tailwindcss: ^4.0.0
     dependencies:
