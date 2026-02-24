@@ -336,10 +336,15 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
         const createUtilityHandler = (negate: boolean) => {
           return (
             value: string,
-            _extra: { modifier: string | null },
+            extra: { modifier: string | null },
           ): CssInJs => {
+            // In Tailwind v4, the "/" in "fl-p-4/8" is interpreted as modifier syntax.
+            // Tailwind sends value="4" and modifier="8". We reconstruct "4/8" here.
+            const effectiveValue =
+              extra.modifier != null ? `${value}/${extra.modifier}` : value;
+
             // Handle arbitrary values like [1rem/2rem]
-            const arbitraryValue = parseArbitraryValue(value);
+            const arbitraryValue = parseArbitraryValue(effectiveValue);
             if (arbitraryValue) {
               const arbitraryParsed = parseFluidString(arbitraryValue);
               if (!arbitraryParsed) return {};
@@ -368,7 +373,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
               return createFluidDeclaration(utilityDef.property, result);
             }
 
-            const parsed = parseFluidString(value);
+            const parsed = parseFluidString(effectiveValue);
             if (!parsed) return {};
 
             // Resolve theme values
@@ -429,6 +434,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
           },
           {
             values: fluidValues,
+            modifiers: "any",
           },
         );
 
@@ -445,6 +451,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             },
             {
               values: fluidValues,
+              modifiers: "any",
             },
           );
         }
@@ -478,9 +485,13 @@ function registerSpaceUtility(
 
   // Create space utility handler
   const createSpaceHandler = (negate: boolean) => {
-    return (value: string, _extra: { modifier: string | null }): CssInJs => {
+    return (value: string, extra: { modifier: string | null }): CssInJs => {
+      // In Tailwind v4, reconstruct "value/modifier" from the slash syntax
+      const effectiveValue =
+        extra.modifier != null ? `${value}/${extra.modifier}` : value;
+
       // Handle arbitrary values
-      const arbitraryValue = parseArbitraryValue(value);
+      const arbitraryValue = parseArbitraryValue(effectiveValue);
       if (arbitraryValue) {
         const arbitraryParsed = parseFluidString(arbitraryValue);
         if (!arbitraryParsed) return {};
@@ -507,7 +518,7 @@ function registerSpaceUtility(
         };
       }
 
-      const parsed = parseFluidString(value);
+      const parsed = parseFluidString(effectiveValue);
       if (!parsed) return {};
 
       const minResolved = resolveThemeValue(parsed.min, themeValues);
@@ -546,6 +557,7 @@ function registerSpaceUtility(
     },
     {
       values: fluidValues,
+      modifiers: "any",
     },
   );
 
@@ -557,6 +569,7 @@ function registerSpaceUtility(
     },
     {
       values: fluidValues,
+      modifiers: "any",
     },
   );
 }
@@ -579,9 +592,13 @@ function registerTranslateUtility(
 
   // Create translate utility handler
   const createTranslateHandler = (negate: boolean) => {
-    return (value: string, _extra: { modifier: string | null }): CssInJs => {
+    return (value: string, extra: { modifier: string | null }): CssInJs => {
+      // In Tailwind v4, reconstruct "value/modifier" from the slash syntax
+      const effectiveValue =
+        extra.modifier != null ? `${value}/${extra.modifier}` : value;
+
       // Handle arbitrary values
-      const arbitraryValue = parseArbitraryValue(value);
+      const arbitraryValue = parseArbitraryValue(effectiveValue);
       if (arbitraryValue) {
         const arbitraryParsed = parseFluidString(arbitraryValue);
         if (!arbitraryParsed) return {};
@@ -607,7 +624,7 @@ function registerTranslateUtility(
         };
       }
 
-      const parsed = parseFluidString(value);
+      const parsed = parseFluidString(effectiveValue);
       if (!parsed) return {};
 
       const minResolved = resolveThemeValue(parsed.min, themeValues);
@@ -645,6 +662,7 @@ function registerTranslateUtility(
     },
     {
       values: fluidValues,
+      modifiers: "any",
     },
   );
 
@@ -657,6 +675,7 @@ function registerTranslateUtility(
       },
       {
         values: fluidValues,
+        modifiers: "any",
       },
     );
   }
