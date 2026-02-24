@@ -1,18 +1,21 @@
-import Sidebar from './components/Sidebar'
-import Hero from './components/Hero'
-import Installation from './components/Installation'
-import BasicUsage from './components/BasicUsage'
-import Configuration from './components/Configuration'
-import Advanced from './components/Advanced'
-import Integrations from './components/Integrations'
-import Limitations from './components/Limitations'
-import Troubleshooting from './components/Troubleshooting'
+import Sidebar from "./components/Sidebar";
+import Hero from "./components/Hero";
+import Installation from "./components/Installation";
+import BasicUsage from "./components/BasicUsage";
+import Configuration from "./components/Configuration";
+import Advanced from "./components/Advanced";
+import Integrations from "./components/Integrations";
+import Limitations from "./components/Limitations";
+import Troubleshooting from "./components/Troubleshooting";
+
+import { Analytics } from "@vercel/analytics/next";
 
 export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Background gradient effect */}
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 pointer-events-none" />
+      <Analytics />
+      <div className="fixed inset-0 bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 pointer-events-none" />
       <div className="fixed top-0 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -40,7 +43,8 @@ export default function App() {
             {/* Footer */}
             <footer className="border-t border-slate-800 fl-pt-8/12 fl-mt-8/16 text-center">
               <p className="fl-text-sm/base text-slate-500">
-                All utilities scale fluidly between 375px and 1440px viewport width
+                All utilities scale fluidly between 375px and 1440px viewport
+                width
               </p>
               <p className="fl-text-xs/sm text-slate-600 fl-mt-2/3">
                 fluid-tailwindcss • MIT License
@@ -48,7 +52,9 @@ export default function App() {
 
               {/* Blog Posts */}
               <div className="fl-mt-6/8">
-                <p className="fl-text-xs/sm text-slate-500 fl-mb-2/3">Read about the development journey:</p>
+                <p className="fl-text-xs/sm text-slate-500 fl-mb-2/3">
+                  Read about the development journey:
+                </p>
                 <div className="flex flex-col sm:flex-row justify-center fl-gap-2/3">
                   <a
                     href="https://medium.com/@nguyenviet02.dev/building-fluid-responsive-designs-in-tailwindcss-v4-how-i-created-fluid-tailwindcss-cbd5f833a953"
@@ -96,7 +102,7 @@ export default function App() {
       {/* Mobile navigation */}
       <MobileNav />
     </div>
-  )
+  );
 }
 
 function MobileNav() {
@@ -109,23 +115,24 @@ function MobileNav() {
         <NavLink href="#advanced" label="Advanced" />
       </div>
     </nav>
-  )
+  );
 }
 
 function NavLink({ href, label }) {
   const handleClick = (e) => {
-    e.preventDefault()
-    const id = href.replace('#', '')
-    const element = document.getElementById(id)
+    e.preventDefault();
+    const id = href.replace("#", "");
+    const element = document.getElementById(id);
     if (element) {
-      const offset = 24
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY
+      const offset = 24;
+      const elementPosition =
+        element.getBoundingClientRect().top + window.scrollY;
       window.scrollTo({
         top: elementPosition - offset,
-        behavior: 'smooth'
-      })
+        behavior: "smooth",
+      });
     }
-  }
+  };
 
   return (
     <a
@@ -135,5 +142,5 @@ function NavLink({ href, label }) {
     >
       {label}
     </a>
-  )
+  );
 }
