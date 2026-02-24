@@ -202,3 +202,16 @@ export interface AccessibilityCheckResult {
   isValid: boolean;
   warning?: string;
 }
+
+/**
+ * Explicit type for the fluid plugin returned by plugin.withOptions.
+ * Defined locally so the exported declaration does not reference
+ * tailwindcss internal hashed dist modules.
+ */
+export type FluidPlugin = {
+  (options?: FluidOptions): {
+    handler: (api: PluginAPI) => void;
+    config?: object;
+  };
+  __isOptionsFunction: true;
+};

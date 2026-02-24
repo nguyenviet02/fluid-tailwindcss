@@ -57,18 +57,38 @@
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "vitest run",
-    "lint": "tsc --noEmit",
+    "lint": "eslint src tests && tsc --noEmit",
+    "format": "prettier --write .",
+    "lint:fix": "eslint --fix .",
+    "lint:fix:format": "prettier --write --fix .",
+    "prepare": "husky",
     "prepublishOnly": "npm run build"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "tests/**/*.ts": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   },
   "peerDependencies": {
     "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^20.10.0",
+    "eslint": "^10.0.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
     "tailwind-merge": "^2.2.0",
     "tailwindcss": "^4.0.0",
     "tsup": "^8.0.1",
     "typescript": "^5.3.3",
+    "typescript-eslint": "^8.56.1",
     "vitest": "^1.1.0"
   }
 }
