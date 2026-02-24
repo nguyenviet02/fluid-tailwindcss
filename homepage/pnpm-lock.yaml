@@ -9,8 +9,8 @@ dependencies:
     specifier: ^4.1.17
     version: 4.2.1(vite@7.3.1)
   fluid-tailwindcss:
-    specifier: file:..
-    version: file:..(tailwindcss@4.2.1)
+    specifier: 1.0.7
+    version: 1.0.7(tailwindcss@4.2.1)
   react:
     specifier: ^19.2.0
     version: 19.2.4
@@ -1321,6 +1321,14 @@ packages:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
     dev: true
 
+  /fluid-tailwindcss@1.0.7(tailwindcss@4.2.1):
+    resolution: {integrity: sha512-6YSFjrNPxEM4WnOJjmWr06QwiFJ8JHj7SsXzA20Rluge8Dl7oxY+1r1vio3O1iqSuzlXbhklUOf9P8hMR5OJFQ==}
+    peerDependencies:
+      tailwindcss: ^4.0.0
+    dependencies:
+      tailwindcss: 4.2.1
+    dev: false
+
   /fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -1907,13 +1915,3 @@ packages:
   /zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
     dev: true
-
-  file:..(tailwindcss@4.2.1):
-    resolution: {directory: .., type: directory}
-    id: file:..
-    name: fluid-tailwindcss
-    peerDependencies:
-      tailwindcss: ^4.0.0
-    dependencies:
-      tailwindcss: 4.2.1
-    dev: false
