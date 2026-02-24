@@ -7,12 +7,21 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "lint:fix": "eslint --fix .",
+    "lint:fix:format": "prettier --write --fix .",
     "preview": "vite preview"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
     "@vercel/analytics": "^1.6.1",
-    "fluid-tailwindcss": "1.0.7",
+    "fluid-tailwindcss": "file:..",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.1.17"
@@ -26,6 +35,8 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
     "vite": "^7.2.4"
   }
 }

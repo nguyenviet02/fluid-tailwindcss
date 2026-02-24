@@ -1,6 +1,7 @@
 import plugin from "tailwindcss/plugin";
 import type {
   FluidOptions,
+  FluidPlugin,
   ResolvedFluidOptions,
   CssInJs,
   PluginAPI,
@@ -19,6 +20,7 @@ import { Length } from "./length";
 // Re-export types for consumers
 export type {
   FluidOptions,
+  FluidPlugin,
   ResolvedFluidOptions,
   FluidValue,
   UtilityDefinition,
@@ -354,7 +356,6 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
                 const validation = validateFluidUnits(
                   arbitraryParsed.min,
                   arbitraryParsed.max,
-                  resolvedOptions.rootFontSize,
                 );
                 if (!validation.valid) {
                   console.warn(
@@ -387,11 +388,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             // for theme-based pairs, but still catches edge cases where the
             // resolved value differs from what extractUnit() predicted.
             if (resolvedOptions.validateUnits) {
-              const validation = validateFluidUnits(
-                minResolved,
-                maxResolved,
-                resolvedOptions.rootFontSize,
-              );
+              const validation = validateFluidUnits(minResolved, maxResolved);
               if (!validation.valid) {
                 if (resolvedOptions.debug) {
                   console.warn(
@@ -459,10 +456,10 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
     };
   },
   // Plugin configuration (for @plugin options)
-  (_options = {}) => ({
+  () => ({
     // No additional Tailwind config needed
   }),
-);
+) as unknown as FluidPlugin;
 
 /**
  * Registers space-x/space-y utilities with proper child selectors
@@ -500,7 +497,6 @@ function registerSpaceUtility(
           const validation = validateFluidUnits(
             arbitraryParsed.min,
             arbitraryParsed.max,
-            resolvedOptions.rootFontSize,
           );
           if (!validation.valid) return {};
         }
@@ -527,11 +523,7 @@ function registerSpaceUtility(
       if (!minResolved || !maxResolved) return {};
 
       if (resolvedOptions.validateUnits) {
-        const validation = validateFluidUnits(
-          minResolved,
-          maxResolved,
-          resolvedOptions.rootFontSize,
-        );
+        const validation = validateFluidUnits(minResolved, maxResolved);
         if (!validation.valid) return {};
       }
 
@@ -607,7 +599,6 @@ function registerTranslateUtility(
           const validation = validateFluidUnits(
             arbitraryParsed.min,
             arbitraryParsed.max,
-            resolvedOptions.rootFontSize,
           );
           if (!validation.valid) return {};
         }
@@ -633,11 +624,7 @@ function registerTranslateUtility(
       if (!minResolved || !maxResolved) return {};
 
       if (resolvedOptions.validateUnits) {
-        const validation = validateFluidUnits(
-          minResolved,
-          maxResolved,
-          resolvedOptions.rootFontSize,
-        );
+        const validation = validateFluidUnits(minResolved, maxResolved);
         if (!validation.valid) return {};
       }
 

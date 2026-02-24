@@ -3,22 +3,28 @@
  * Ensures compatibility of values and breakpoints before applying fluid calculations
  */
 
-import { Length } from './length'
-import { FluidError } from './errors'
-import type { ResolvedFluidOptions, ValidationResult, FluidValuePair } from './types'
+import { Length } from "./length";
+import { FluidError } from "./errors";
+import type {
+  ResolvedFluidOptions,
+  ValidationResult,
+  FluidValuePair,
+} from "./types";
 
 /**
  * Supported CSS units for fluid calculations
  * Values must use the same unit for proper interpolation
  */
-export const SUPPORTED_UNITS = ['rem', 'px', 'em'] as const
-export type SupportedUnit = (typeof SUPPORTED_UNITS)[number]
+export const SUPPORTED_UNITS = ["rem", "px", "em"] as const;
+export type SupportedUnit = (typeof SUPPORTED_UNITS)[number];
 
 /**
  * Check if a unit is supported for fluid calculations
  */
-export function isSupportedUnit(unit: string | undefined): unit is SupportedUnit {
-  return SUPPORTED_UNITS.includes(unit as SupportedUnit)
+export function isSupportedUnit(
+  unit: string | undefined,
+): unit is SupportedUnit {
+  return SUPPORTED_UNITS.includes(unit as SupportedUnit);
 }
 
 /**
@@ -29,47 +35,51 @@ export function isSupportedUnit(unit: string | undefined): unit is SupportedUnit
  */
 export function validateUnitsMatch(
   start: Length | string,
-  end: Length | string
+  end: Length | string,
 ): ValidationResult {
-  const startLen = start instanceof Length ? start : Length.parse(start)
-  const endLen = end instanceof Length ? end : Length.parse(end)
+  const startLen = start instanceof Length ? start : Length.parse(start);
+  const endLen = end instanceof Length ? end : Length.parse(end);
 
   if (!startLen) {
     return {
       valid: false,
-      error: FluidError.fromCode('invalid-min', String(start)),
-    }
+      error: FluidError.fromCode("invalid-min", String(start)),
+    };
   }
 
   if (!endLen) {
     return {
       valid: false,
-      error: FluidError.fromCode('invalid-max', String(end)),
-    }
+      error: FluidError.fromCode("invalid-max", String(end)),
+    };
   }
 
   // Handle zero values - they can adopt any unit
   if (startLen.number === 0 || endLen.number === 0) {
-    return { valid: true }
+    return { valid: true };
   }
 
   // Check if units match
   if (startLen.unit !== endLen.unit) {
     return {
       valid: false,
-      error: FluidError.fromCode('mismatched-units', startLen.cssText, endLen.cssText),
-    }
+      error: FluidError.fromCode(
+        "mismatched-units",
+        startLen.cssText,
+        endLen.cssText,
+      ),
+    };
   }
 
   // Check if unit is supported
   if (!isSupportedUnit(startLen.unit)) {
     return {
       valid: false,
-      error: FluidError.fromCode('unsupported-unit', startLen.unit || 'none'),
-    }
+      error: FluidError.fromCode("unsupported-unit", startLen.unit || "none"),
+    };
   }
 
-  return { valid: true }
+  return { valid: true };
 }
 
 /**
@@ -80,34 +90,33 @@ export function validateBreakpointsCompatible(
   value: Length | string,
   minViewport: number,
   maxViewport: number,
-  _rootFontSize: number
 ): ValidationResult {
-  const len = value instanceof Length ? value : Length.parse(value)
-  
+  const len = value instanceof Length ? value : Length.parse(value);
+
   if (!len) {
     return {
       valid: false,
-      error: FluidError.fromCode('invalid-min', String(value)),
-    }
+      error: FluidError.fromCode("invalid-min", String(value)),
+    };
   }
 
   // Convert viewport to the same unit as value for comparison
   // This is informational - we always use rem internally
-  const unit = len.unit
+  const unit = len.unit;
 
   if (!unit) {
-    return { valid: true } // Unitless values are handled differently
+    return { valid: true }; // Unitless values are handled differently
   }
 
   // Check for potential issues
   if (minViewport >= maxViewport) {
     return {
       valid: false,
-      error: FluidError.fromCode('no-change-bp', `${minViewport}px`),
-    }
+      error: FluidError.fromCode("no-change-bp", `${minViewport}px`),
+    };
   }
 
-  return { valid: true }
+  return { valid: true };
 }
 
 /**
@@ -115,23 +124,23 @@ export function validateBreakpointsCompatible(
  */
 export function validateValuesAreDifferent(
   start: Length | string,
-  end: Length | string
+  end: Length | string,
 ): ValidationResult {
-  const startLen = start instanceof Length ? start : Length.parse(start)
-  const endLen = end instanceof Length ? end : Length.parse(end)
+  const startLen = start instanceof Length ? start : Length.parse(start);
+  const endLen = end instanceof Length ? end : Length.parse(end);
 
   if (!startLen || !endLen) {
-    return { valid: true } // Will be caught by other validators
+    return { valid: true }; // Will be caught by other validators
   }
 
   if (startLen.number === endLen.number && startLen.unit === endLen.unit) {
     return {
       valid: false,
-      error: FluidError.fromCode('no-change', startLen.cssText),
-    }
+      error: FluidError.fromCode("no-change", startLen.cssText),
+    };
   }
 
-  return { valid: true }
+  return { valid: true };
 }
 
 /**
@@ -141,26 +150,25 @@ export function validateValuesAreDifferent(
 export function validateFluidPair(
   minValue: string,
   maxValue: string,
-  options: ResolvedFluidOptions
+  options: ResolvedFluidOptions,
 ): ValidationResult {
   // Check units match
-  const unitsResult = validateUnitsMatch(minValue, maxValue)
-  if (!unitsResult.valid) return unitsResult
+  const unitsResult = validateUnitsMatch(minValue, maxValue);
+  if (!unitsResult.valid) return unitsResult;
 
   // Check values are different
-  const diffResult = validateValuesAreDifferent(minValue, maxValue)
-  if (!diffResult.valid) return diffResult
+  const diffResult = validateValuesAreDifferent(minValue, maxValue);
+  if (!diffResult.valid) return diffResult;
 
   // Check breakpoints compatibility
   const bpResult = validateBreakpointsCompatible(
     minValue,
     options.minViewport,
     options.maxViewport,
-    options.rootFontSize
-  )
-  if (!bpResult.valid) return bpResult
+  );
+  if (!bpResult.valid) return bpResult;
 
-  return { valid: true }
+  return { valid: true };
 }
 
 /**
@@ -170,47 +178,47 @@ export function validateFluidPair(
 export function parseAndValidateFluidPair(
   value: string,
   themeValues: Record<string, unknown>,
-  options: ResolvedFluidOptions
+  options: ResolvedFluidOptions,
 ): FluidValuePair | ValidationResult {
   // Parse the "min/max" format
-  const parts = value.split('/')
+  const parts = value.split("/");
   if (parts.length !== 2) {
     return {
       valid: false,
-      error: FluidError.fromCode('parse-failed', value),
-    }
+      error: FluidError.fromCode("parse-failed", value),
+    };
   }
 
-  const [minKey, maxKey] = parts.map(s => s.trim())
+  const [minKey, maxKey] = parts.map((s) => s.trim());
   if (!minKey || !maxKey) {
     return {
       valid: false,
-      error: FluidError.fromCode('parse-failed', value),
-    }
+      error: FluidError.fromCode("parse-failed", value),
+    };
   }
 
   // Resolve theme values
-  const minResolved = resolveValue(minKey, themeValues, options.rootFontSize)
-  const maxResolved = resolveValue(maxKey, themeValues, options.rootFontSize)
+  const minResolved = resolveValue(minKey, themeValues);
+  const maxResolved = resolveValue(maxKey, themeValues);
 
   if (!minResolved) {
     return {
       valid: false,
-      error: FluidError.fromCode('theme-value-not-found', minKey),
-    }
+      error: FluidError.fromCode("theme-value-not-found", minKey),
+    };
   }
 
   if (!maxResolved) {
     return {
       valid: false,
-      error: FluidError.fromCode('theme-value-not-found', maxKey),
-    }
+      error: FluidError.fromCode("theme-value-not-found", maxKey),
+    };
   }
 
   // Validate the pair
-  const validation = validateFluidPair(minResolved, maxResolved, options)
+  const validation = validateFluidPair(minResolved, maxResolved, options);
   if (!validation.valid) {
-    return validation
+    return validation;
   }
 
   return {
@@ -220,7 +228,7 @@ export function parseAndValidateFluidPair(
     maxKey,
     minResolved,
     maxResolved,
-  }
+  };
 }
 
 /**
@@ -230,29 +238,28 @@ export function parseAndValidateFluidPair(
 function resolveValue(
   key: string,
   themeValues: Record<string, unknown>,
-  _rootFontSize: number
 ): string | null {
   // If it's already a CSS value with unit
-  const parsed = Length.parse(key)
+  const parsed = Length.parse(key);
   if (parsed?.unit) {
-    return key
+    return key;
   }
 
   // Try theme lookup
-  const themeValue = themeValues[key]
+  const themeValue = themeValues[key];
   if (themeValue !== undefined) {
     // Extract string value from various theme formats
-    if (typeof themeValue === 'string') {
-      return themeValue
+    if (typeof themeValue === "string") {
+      return themeValue;
     }
-    if (Array.isArray(themeValue) && typeof themeValue[0] === 'string') {
-      return themeValue[0]
+    if (Array.isArray(themeValue) && typeof themeValue[0] === "string") {
+      return themeValue[0];
     }
-    if (typeof themeValue === 'object' && themeValue !== null) {
-      const obj = themeValue as Record<string, unknown>
-      for (const prop of ['fontSize', 'value', 'size']) {
-        if (typeof obj[prop] === 'string') {
-          return obj[prop] as string
+    if (typeof themeValue === "object" && themeValue !== null) {
+      const obj = themeValue as Record<string, unknown>;
+      for (const prop of ["fontSize", "value", "size"]) {
+        if (typeof obj[prop] === "string") {
+          return obj[prop] as string;
         }
       }
     }
@@ -260,11 +267,11 @@ function resolveValue(
 
   // Try as numeric spacing scale (1 = 0.25rem, 4 = 1rem)
   if (/^-?\d+(\.\d+)?$/.test(key)) {
-    const num = parseFloat(key)
-    return `${num * 0.25}rem`
+    const num = parseFloat(key);
+    return `${num * 0.25}rem`;
   }
 
-  return null
+  return null;
 }
 
 /**
@@ -276,24 +283,23 @@ export function createDebugComment(
   maxValue: string,
   minViewport: number,
   maxViewport: number,
-  isContainer = false
+  isContainer = false,
 ): string {
-  const type = isContainer ? 'container' : 'viewport'
-  return `/* fluid from ${minValue} at ${minViewport}px to ${maxValue} at ${maxViewport}px (${type}) */`
+  const type = isContainer ? "container" : "viewport";
+  return `/* fluid from ${minValue} at ${minViewport}px to ${maxValue} at ${maxViewport}px (${type}) */`;
 }
 
 /**
  * Validates arbitrary value syntax [value]
  */
 export function parseArbitraryValue(value: string): string | null {
-  const match = value.match(/^\[(.*?)\]$/)
-  return match ? match[1] : null
+  const match = value.match(/^\[(.*?)\]$/);
+  return match ? match[1] : null;
 }
 
 /**
  * Check if value is an arbitrary value
  */
 export function isArbitraryValue(value: string): boolean {
-  return /^\[.*\]$/.test(value)
+  return /^\[.*\]$/.test(value);
 }
-

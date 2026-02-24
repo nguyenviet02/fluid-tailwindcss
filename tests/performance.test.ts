@@ -83,15 +83,6 @@ function benchmark(fn: () => void, iterations: number) {
 // ─── Performance benchmarks ─────────────────────────────────────────────
 
 describe("performance benchmarks", () => {
-  const allScales: Record<string, Record<string, unknown>> = {
-    spacing: defaultSpacing,
-    fontSize: defaultFontSize,
-    lineHeight: defaultLineHeight,
-    letterSpacing: defaultLetterSpacing,
-    borderRadius: defaultBorderRadius,
-    borderWidth: defaultBorderWidth,
-  };
-
   it("should show O(n) is faster than O(n²) for single spacing scale", () => {
     const iterations = 1000;
 

@@ -1,0 +1,2 @@
+pnpm lint-staged
+cd homepage && pnpm lint-staged
