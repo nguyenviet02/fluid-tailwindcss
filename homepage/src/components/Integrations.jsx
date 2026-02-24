@@ -79,12 +79,16 @@ const twMerge = createTwMerge({
               <span className="text-emerald-400">"p-4"</span>
             </div>
             <div className="flex items-center fl-gap-2/3">
-              <span className="text-slate-400">twMerge("fl-m-2/4", "neg-fl-m-4/8")</span>
+              <span className="text-slate-400">
+                twMerge("fl-m-2/4", "neg-fl-m-4/8")
+              </span>
               <span className="text-emerald-400">→</span>
               <span className="text-emerald-400">"neg-fl-m-4/8"</span>
             </div>
             <div className="flex items-center fl-gap-2/3">
-              <span className="text-slate-400">twMerge("px-4", "fl-px-2/8")</span>
+              <span className="text-slate-400">
+                twMerge("px-4", "fl-px-2/8")
+              </span>
               <span className="text-emerald-400">→</span>
               <span className="text-emerald-400">"fl-px-2/8"</span>
             </div>

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from "vitest";
 import {
   calculateClamp,
   parseValueToRem,
@@ -12,8 +12,8 @@ import {
   clampNumber,
   checkSC144,
   calculateNegativeClamp,
-} from '../src/clamp'
-import type { ResolvedFluidOptions } from '../src/types'
+} from "../src/clamp";
+import type { ResolvedFluidOptions } from "../src/types";
 
 const defaultOptions: ResolvedFluidOptions = {
   minViewport: 375,
@@ -21,300 +21,320 @@ const defaultOptions: ResolvedFluidOptions = {
   useRem: true,
   rootFontSize: 16,
   checkAccessibility: true,
-}
+};
 
-describe('parseValueToRem', () => {
-  it('should parse rem values correctly', () => {
-    expect(parseValueToRem('1rem', 16)).toBe(1)
-    expect(parseValueToRem('2.5rem', 16)).toBe(2.5)
-    expect(parseValueToRem('0.25rem', 16)).toBe(0.25)
-  })
+describe("parseValueToRem", () => {
+  it("should parse rem values correctly", () => {
+    expect(parseValueToRem("1rem", 16)).toBe(1);
+    expect(parseValueToRem("2.5rem", 16)).toBe(2.5);
+    expect(parseValueToRem("0.25rem", 16)).toBe(0.25);
+  });
 
-  it('should parse px values correctly', () => {
-    expect(parseValueToRem('16px', 16)).toBe(1)
-    expect(parseValueToRem('32px', 16)).toBe(2)
-    expect(parseValueToRem('8px', 16)).toBe(0.5)
-  })
+  it("should parse px values correctly", () => {
+    expect(parseValueToRem("16px", 16)).toBe(1);
+    expect(parseValueToRem("32px", 16)).toBe(2);
+    expect(parseValueToRem("8px", 16)).toBe(0.5);
+  });
 
-  it('should parse em values as rem', () => {
-    expect(parseValueToRem('1em', 16)).toBe(1)
-    expect(parseValueToRem('1.5em', 16)).toBe(1.5)
-  })
+  it("should parse em values as rem", () => {
+    expect(parseValueToRem("1em", 16)).toBe(1);
+    expect(parseValueToRem("1.5em", 16)).toBe(1.5);
+  });
 
-  it('should parse unitless values as Tailwind spacing scale', () => {
-    expect(parseValueToRem('4', 16)).toBe(1) // 4 * 0.25 = 1rem
-    expect(parseValueToRem('8', 16)).toBe(2) // 8 * 0.25 = 2rem
-    expect(parseValueToRem('1', 16)).toBe(0.25) // 1 * 0.25 = 0.25rem
-  })
+  it("should parse unitless values as Tailwind spacing scale", () => {
+    expect(parseValueToRem("4", 16)).toBe(1); // 4 * 0.25 = 1rem
+    expect(parseValueToRem("8", 16)).toBe(2); // 8 * 0.25 = 2rem
+    expect(parseValueToRem("1", 16)).toBe(0.25); // 1 * 0.25 = 0.25rem
+  });
 
-  it('should handle zero values', () => {
-    expect(parseValueToRem('0', 16)).toBe(0)
-    expect(parseValueToRem('0px', 16)).toBe(0)
-    expect(parseValueToRem('0rem', 16)).toBe(0)
-  })
-})
+  it("should handle zero values", () => {
+    expect(parseValueToRem("0", 16)).toBe(0);
+    expect(parseValueToRem("0px", 16)).toBe(0);
+    expect(parseValueToRem("0rem", 16)).toBe(0);
+  });
+});
 
-describe('parseValueToPx', () => {
-  it('should convert rem to px correctly', () => {
-    expect(parseValueToPx('1rem', 16)).toBe(16)
-    expect(parseValueToPx('2rem', 16)).toBe(32)
-  })
+describe("parseValueToPx", () => {
+  it("should convert rem to px correctly", () => {
+    expect(parseValueToPx("1rem", 16)).toBe(16);
+    expect(parseValueToPx("2rem", 16)).toBe(32);
+  });
 
-  it('should keep px values as-is', () => {
-    expect(parseValueToPx('24px', 16)).toBe(24)
-    expect(parseValueToPx('16px', 16)).toBe(16)
-  })
-})
+  it("should keep px values as-is", () => {
+    expect(parseValueToPx("24px", 16)).toBe(24);
+    expect(parseValueToPx("16px", 16)).toBe(16);
+  });
+});
 
-describe('round', () => {
-  it('should round to specified decimal places', () => {
-    expect(round(1.23456789, 4)).toBe(1.2346)
-    expect(round(1.23456789, 2)).toBe(1.23)
-    expect(round(1.5, 0)).toBe(2)
-  })
-})
+describe("round", () => {
+  it("should round to specified decimal places", () => {
+    expect(round(1.23456789, 4)).toBe(1.2346);
+    expect(round(1.23456789, 2)).toBe(1.23);
+    expect(round(1.5, 0)).toBe(2);
+  });
+});
 
-describe('parseFluidString', () => {
-  it('should parse valid fluid strings', () => {
-    expect(parseFluidString('4/8')).toEqual({ min: '4', max: '8' })
-    expect(parseFluidString('base/2xl')).toEqual({ min: 'base', max: '2xl' })
-    expect(parseFluidString('sm/lg')).toEqual({ min: 'sm', max: 'lg' })
-    expect(parseFluidString('0.5/1.5')).toEqual({ min: '0.5', max: '1.5' })
-  })
+describe("parseFluidString", () => {
+  it("should parse valid fluid strings", () => {
+    expect(parseFluidString("4/8")).toEqual({ min: "4", max: "8" });
+    expect(parseFluidString("base/2xl")).toEqual({ min: "base", max: "2xl" });
+    expect(parseFluidString("sm/lg")).toEqual({ min: "sm", max: "lg" });
+    expect(parseFluidString("0.5/1.5")).toEqual({ min: "0.5", max: "1.5" });
+  });
 
-  it('should handle spaces correctly', () => {
-    expect(parseFluidString(' 4 / 8 ')).toEqual({ min: '4', max: '8' })
-  })
+  it("should handle spaces correctly", () => {
+    expect(parseFluidString(" 4 / 8 ")).toEqual({ min: "4", max: "8" });
+  });
 
-  it('should return null for invalid strings', () => {
-    expect(parseFluidString('4')).toBeNull()
-    expect(parseFluidString('4/8/12')).toBeNull()
-    expect(parseFluidString('')).toBeNull()
-    expect(parseFluidString('/')).toBeNull()
-  })
-})
+  it("should return null for invalid strings", () => {
+    expect(parseFluidString("4")).toBeNull();
+    expect(parseFluidString("4/8/12")).toBeNull();
+    expect(parseFluidString("")).toBeNull();
+    expect(parseFluidString("/")).toBeNull();
+  });
+});
 
-describe('resolveThemeValue', () => {
+describe("resolveThemeValue", () => {
   const themeValues = {
-    '4': '1rem',
-    '8': '2rem',
-    'base': '1rem',
-    '2xl': '1.5rem',
-  }
+    "4": "1rem",
+    "8": "2rem",
+    base: "1rem",
+    "2xl": "1.5rem",
+  };
 
-  it('should resolve theme keys', () => {
-    expect(resolveThemeValue('4', themeValues)).toBe('1rem')
-    expect(resolveThemeValue('8', themeValues)).toBe('2rem')
-    expect(resolveThemeValue('base', themeValues)).toBe('1rem')
-  })
+  it("should resolve theme keys", () => {
+    expect(resolveThemeValue("4", themeValues)).toBe("1rem");
+    expect(resolveThemeValue("8", themeValues)).toBe("2rem");
+    expect(resolveThemeValue("base", themeValues)).toBe("1rem");
+  });
 
-  it('should pass through CSS values', () => {
-    expect(resolveThemeValue('1.5rem', themeValues)).toBe('1.5rem')
-    expect(resolveThemeValue('24px', themeValues)).toBe('24px')
-  })
+  it("should pass through CSS values", () => {
+    expect(resolveThemeValue("1.5rem", themeValues)).toBe("1.5rem");
+    expect(resolveThemeValue("24px", themeValues)).toBe("24px");
+  });
 
-  it('should convert numeric values to rem', () => {
-    expect(resolveThemeValue('6', {})).toBe('1.5rem') // 6 * 0.25
-    expect(resolveThemeValue('10', {})).toBe('2.5rem') // 10 * 0.25
-  })
+  it("should convert numeric values to rem", () => {
+    expect(resolveThemeValue("6", {})).toBe("1.5rem"); // 6 * 0.25
+    expect(resolveThemeValue("10", {})).toBe("2.5rem"); // 10 * 0.25
+  });
 
-  it('should return null for unknown theme keys', () => {
-    expect(resolveThemeValue('unknown', themeValues)).toBeNull()
-  })
-})
+  it("should return null for unknown theme keys", () => {
+    expect(resolveThemeValue("unknown", themeValues)).toBeNull();
+  });
+});
 
-describe('calculateClamp', () => {
-  it('should generate correct clamp for spacing values', () => {
-    const result = calculateClamp('1rem', '2rem', defaultOptions)
-    
+describe("calculateClamp", () => {
+  it("should generate correct clamp for spacing values", () => {
+    const result = calculateClamp("1rem", "2rem", defaultOptions);
+
     // Should return clamp(minRem, preferred, maxRem)
-    expect(result).toMatch(/^clamp\(/)
-    expect(result).toContain('1rem')
-    expect(result).toContain('2rem')
-    expect(result).toContain('vw')
-  })
+    expect(result).toMatch(/^clamp\(/);
+    expect(result).toContain("1rem");
+    expect(result).toContain("2rem");
+    expect(result).toContain("vw");
+  });
 
-  it('should generate correct clamp for px values', () => {
-    const options = { ...defaultOptions, useRem: false }
-    const result = calculateClamp('16px', '32px', options)
-    
-    expect(result).toMatch(/^clamp\(/)
-    expect(result).toContain('16px')
-    expect(result).toContain('32px')
-  })
+  it("should generate correct clamp for px values", () => {
+    const options = { ...defaultOptions, useRem: false };
+    const result = calculateClamp("16px", "32px", options);
 
-  it('should return simple value when min equals max', () => {
-    const result = calculateClamp('1rem', '1rem', defaultOptions)
-    expect(result).toBe('1rem')
-  })
+    expect(result).toMatch(/^clamp\(/);
+    expect(result).toContain("16px");
+    expect(result).toContain("32px");
+  });
 
-  it('should handle the example case ~p-6/10', () => {
+  it("should return simple value when min equals max", () => {
+    const result = calculateClamp("1rem", "1rem", defaultOptions);
+    expect(result).toBe("1rem");
+  });
+
+  it("should handle the example case ~p-6/10", () => {
     // ~p-6/10 means padding from spacing 6 (1.5rem) to spacing 10 (2.5rem)
-    const result = calculateClamp('1.5rem', '2.5rem', defaultOptions)
-    
-    expect(result).toMatch(/^clamp\(/)
-    expect(result).toContain('1.5rem')
-    expect(result).toContain('2.5rem')
-    expect(result).toContain('vw')
-  })
+    const result = calculateClamp("1.5rem", "2.5rem", defaultOptions);
 
-  it('should calculate correct viewport-based values', () => {
+    expect(result).toMatch(/^clamp\(/);
+    expect(result).toContain("1.5rem");
+    expect(result).toContain("2.5rem");
+    expect(result).toContain("vw");
+  });
+
+  it("should calculate correct viewport-based values", () => {
     // For min: 1.5rem, max: 2.5rem
     // minViewport: 375px = 23.4375rem
     // maxViewport: 1440px = 90rem
     // slope = (2.5 - 1.5) / (90 - 23.4375) = 1 / 66.5625 ≈ 0.01502
     // intercept = 1.5 - 0.01502 * 23.4375 ≈ 1.148
     // vw factor = slope * 100 ≈ 1.502vw
-    const result = calculateClamp('1.5rem', '2.5rem', defaultOptions)
-    
+    const result = calculateClamp("1.5rem", "2.5rem", defaultOptions);
+
     // The result should contain values close to these
-    expect(result).toContain('1.5rem')
-    expect(result).toContain('2.5rem')
-  })
-})
+    expect(result).toContain("1.5rem");
+    expect(result).toContain("2.5rem");
+  });
+});
 
-describe('checkAccessibility', () => {
-  it('should return valid for non-text utilities', () => {
-    const result = checkAccessibility('0.5rem', defaultOptions, 'other')
-    expect(result.isValid).toBe(true)
-    expect(result.warning).toBeUndefined()
-  })
+describe("checkAccessibility", () => {
+  it("should return valid for non-text utilities", () => {
+    const result = checkAccessibility("0.5rem", defaultOptions, "other");
+    expect(result.isValid).toBe(true);
+    expect(result.warning).toBeUndefined();
+  });
 
-  it('should return valid for reasonable font sizes', () => {
-    const result = checkAccessibility('1rem', defaultOptions, 'text')
-    expect(result.isValid).toBe(true)
-  })
+  it("should return valid for reasonable font sizes", () => {
+    const result = checkAccessibility("1rem", defaultOptions, "text");
+    expect(result.isValid).toBe(true);
+  });
 
-  it('should warn for small font sizes', () => {
-    const result = checkAccessibility('0.5rem', defaultOptions, 'text') // 8px
-    expect(result.isValid).toBe(false)
-    expect(result.warning).toBeDefined()
-    expect(result.warning).toContain('accessibility')
-  })
+  it("should warn for small font sizes", () => {
+    const result = checkAccessibility("0.5rem", defaultOptions, "text"); // 8px
+    expect(result.isValid).toBe(false);
+    expect(result.warning).toBeDefined();
+    expect(result.warning).toContain("accessibility");
+  });
 
-  it('should respect checkAccessibility option', () => {
-    const options = { ...defaultOptions, checkAccessibility: false }
-    const result = checkAccessibility('0.5rem', options, 'text')
-    expect(result.isValid).toBe(true)
-  })
-})
+  it("should respect checkAccessibility option", () => {
+    const options = { ...defaultOptions, checkAccessibility: false };
+    const result = checkAccessibility("0.5rem", options, "text");
+    expect(result.isValid).toBe(true);
+  });
+});
 
-describe('toPrecision', () => {
-  it('should format numbers to specified precision', () => {
-    expect(toPrecision(1.23456789, 2)).toBe('1.23')
-    expect(toPrecision(1.23456789, 4)).toBe('1.2346')
-    expect(toPrecision(1.5, 0)).toBe('2')
-  })
+describe("toPrecision", () => {
+  it("should format numbers to specified precision", () => {
+    expect(toPrecision(1.23456789, 2)).toBe("1.23");
+    expect(toPrecision(1.23456789, 4)).toBe("1.2346");
+    expect(toPrecision(1.5, 0)).toBe("2");
+  });
 
-  it('should not add trailing zeros', () => {
-    expect(toPrecision(1.5, 4)).toBe('1.5')
-    expect(toPrecision(2, 4)).toBe('2')
-  })
+  it("should not add trailing zeros", () => {
+    expect(toPrecision(1.5, 4)).toBe("1.5");
+    expect(toPrecision(2, 4)).toBe("2");
+  });
 
-  it('should handle negative numbers', () => {
-    expect(toPrecision(-1.23456, 2)).toBe('-1.23')
-  })
+  it("should handle negative numbers", () => {
+    expect(toPrecision(-1.23456, 2)).toBe("-1.23");
+  });
 
-  it('should handle zero', () => {
-    expect(toPrecision(0, 4)).toBe('0')
-  })
-})
+  it("should handle zero", () => {
+    expect(toPrecision(0, 4)).toBe("0");
+  });
+});
 
-describe('getPrecision', () => {
-  it('should return 0 for integers', () => {
-    expect(getPrecision(5)).toBe(0)
-    expect(getPrecision(100)).toBe(0)
-    expect(getPrecision(-42)).toBe(0)
-  })
+describe("getPrecision", () => {
+  it("should return 0 for integers", () => {
+    expect(getPrecision(5)).toBe(0);
+    expect(getPrecision(100)).toBe(0);
+    expect(getPrecision(-42)).toBe(0);
+  });
 
-  it('should count decimal places correctly', () => {
-    expect(getPrecision(1.5)).toBe(1)
-    expect(getPrecision(1.25)).toBe(2)
-    expect(getPrecision(1.125)).toBe(3)
-    expect(getPrecision(0.0001)).toBe(4)
-  })
+  it("should count decimal places correctly", () => {
+    expect(getPrecision(1.5)).toBe(1);
+    expect(getPrecision(1.25)).toBe(2);
+    expect(getPrecision(1.125)).toBe(3);
+    expect(getPrecision(0.0001)).toBe(4);
+  });
 
-  it('should handle zero', () => {
-    expect(getPrecision(0)).toBe(0)
-  })
-})
+  it("should handle zero", () => {
+    expect(getPrecision(0)).toBe(0);
+  });
+});
 
-describe('clampNumber', () => {
-  it('should clamp value between min and max', () => {
-    expect(clampNumber(0, 5, 10)).toBe(5)
-    expect(clampNumber(0, -5, 10)).toBe(0)
-    expect(clampNumber(0, 15, 10)).toBe(10)
-  })
+describe("clampNumber", () => {
+  it("should clamp value between min and max", () => {
+    expect(clampNumber(0, 5, 10)).toBe(5);
+    expect(clampNumber(0, -5, 10)).toBe(0);
+    expect(clampNumber(0, 15, 10)).toBe(10);
+  });
 
-  it('should return min when value is less than min', () => {
-    expect(clampNumber(5, 2, 10)).toBe(5)
-  })
+  it("should return min when value is less than min", () => {
+    expect(clampNumber(5, 2, 10)).toBe(5);
+  });
 
-  it('should return max when value is greater than max', () => {
-    expect(clampNumber(0, 15, 10)).toBe(10)
-  })
+  it("should return max when value is greater than max", () => {
+    expect(clampNumber(0, 15, 10)).toBe(10);
+  });
 
-  it('should return value when within range', () => {
-    expect(clampNumber(0, 5, 10)).toBe(5)
-  })
-})
+  it("should return value when within range", () => {
+    expect(clampNumber(0, 5, 10)).toBe(5);
+  });
+});
 
-describe('checkSC144', () => {
-  it('should pass for reasonable typography scaling', () => {
+describe("checkSC144", () => {
+  it("should pass for reasonable typography scaling", () => {
     // Test with typical fluid typography values
-    const startNum = 1 // 1rem
-    const endNum = 2 // 2rem
-    const startBP = 23.4375 // 375px in rem
-    const endBP = 90 // 1440px in rem
-    const slope = (endNum - startNum) / (endBP - startBP)
-    const intercept = startNum - slope * startBP
-    
-    const result = checkSC144(startNum, endNum, startBP, endBP, slope, intercept)
-    expect(result.passes).toBe(true)
-  })
+    const startNum = 1; // 1rem
+    const endNum = 2; // 2rem
+    const startBP = 23.4375; // 375px in rem
+    const endBP = 90; // 1440px in rem
+    const slope = (endNum - startNum) / (endBP - startBP);
+    const intercept = startNum - slope * startBP;
 
-  it('should detect WCAG SC 1.4.4 failures', () => {
+    const result = checkSC144(
+      startNum,
+      endNum,
+      startBP,
+      endBP,
+      slope,
+      intercept,
+    );
+    expect(result.passes).toBe(true);
+  });
+
+  it("should detect WCAG SC 1.4.4 failures", () => {
     // Test with extreme values that would fail SC 1.4.4
-    const startNum = 0.5 // 0.5rem (8px) - very small
-    const endNum = 4 // 4rem (64px) - large
-    const startBP = 20 // Small viewport
-    const endBP = 100 // Large viewport
-    const slope = (endNum - startNum) / (endBP - startBP)
-    const intercept = startNum - slope * startBP
-    
-    const result = checkSC144(startNum, endNum, startBP, endBP, slope, intercept)
+    const startNum = 0.5; // 0.5rem (8px) - very small
+    const endNum = 4; // 4rem (64px) - large
+    const startBP = 20; // Small viewport
+    const endBP = 100; // Large viewport
+    const slope = (endNum - startNum) / (endBP - startBP);
+    const intercept = startNum - slope * startBP;
+
+    const result = checkSC144(
+      startNum,
+      endNum,
+      startBP,
+      endBP,
+      slope,
+      intercept,
+    );
     // The result depends on the specific math, but we're testing the function works
-    expect(typeof result.passes).toBe('boolean')
-  })
+    expect(typeof result.passes).toBe("boolean");
+  });
 
-  it('should include failing viewport when fails', () => {
+  it("should include failing viewport when fails", () => {
     // Create a scenario that's likely to fail
-    const startNum = 0.5
-    const endNum = 5
-    const startBP = 10
-    const endBP = 100
-    const slope = (endNum - startNum) / (endBP - startBP)
-    const intercept = startNum - slope * startBP
-    
-    const result = checkSC144(startNum, endNum, startBP, endBP, slope, intercept)
+    const startNum = 0.5;
+    const endNum = 5;
+    const startBP = 10;
+    const endBP = 100;
+    const slope = (endNum - startNum) / (endBP - startBP);
+    const intercept = startNum - slope * startBP;
+
+    const result = checkSC144(
+      startNum,
+      endNum,
+      startBP,
+      endBP,
+      slope,
+      intercept,
+    );
     if (!result.passes) {
-      expect(result.failingViewport).toBeDefined()
-      expect(result.failingUnit).toBe('rem')
+      expect(result.failingViewport).toBeDefined();
+      expect(result.failingUnit).toBe("rem");
     }
-  })
-})
+  });
+});
 
-describe('calculateNegativeClamp', () => {
-  it('should negate simple values', () => {
-    const options = { ...defaultOptions }
+describe("calculateNegativeClamp", () => {
+  it("should negate simple values", () => {
+    const options = { ...defaultOptions };
     // When min equals max, it returns a simple value
-    const result = calculateNegativeClamp('1rem', '1rem', options)
-    expect(result).toBe('-1rem')
-  })
+    const result = calculateNegativeClamp("1rem", "1rem", options);
+    expect(result).toBe("-1rem");
+  });
 
-  it('should wrap clamp in calc with -1 multiplier', () => {
-    const result = calculateNegativeClamp('1rem', '2rem', defaultOptions)
-    expect(result).toMatch(/^calc\(clamp\(.*\) \* -1\)$/)
-  })
-})
-
+  it("should wrap clamp in calc with -1 multiplier", () => {
+    const result = calculateNegativeClamp("1rem", "2rem", defaultOptions);
+    expect(result).toMatch(/^calc\(clamp\(.*\) \* -1\)$/);
+  });
+});

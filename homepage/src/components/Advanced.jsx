@@ -1,10 +1,12 @@
-import CodeBlock, { InlineCode } from './CodeBlock'
+import CodeBlock, { InlineCode } from "./CodeBlock";
 
 export default function Advanced() {
   return (
     <section id="advanced" className="fl-mb-12/20 scroll-mt-6">
-      <h2 className="fl-text-xl/3xl font-semibold text-white fl-mb-4/6">Advanced Features</h2>
-      
+      <h2 className="fl-text-xl/3xl font-semibold text-white fl-mb-4/6">
+        Advanced Features
+      </h2>
+
       <p className="fl-text-sm/base text-slate-400 fl-mb-6/8">
         Powerful features for complex responsive designs.
       </p>
@@ -16,9 +18,11 @@ export default function Advanced() {
           Negative Values
         </h3>
         <p className="fl-text-sm/base text-slate-400 fl-mb-4/6">
-          Use the <InlineCode className="text-pink-400 bg-pink-500/10">neg-</InlineCode> prefix for negative fluid values:
+          Use the{" "}
+          <InlineCode className="text-pink-400 bg-pink-500/10">neg-</InlineCode>{" "}
+          prefix for negative fluid values:
         </p>
-        
+
         <div className="grid lg:grid-cols-2 fl-gap-4/6 fl-mb-4/6">
           <CodeBlock
             language="html"
@@ -32,9 +36,13 @@ export default function Advanced() {
 <div class="absolute neg-fl-left-2/8">Outside</div>`}
           />
           <div className="bg-slate-900/50 border border-pink-800/30 fl-rounded-lg/xl fl-p-4/6">
-            <p className="fl-text-xs/sm text-slate-500 fl-mb-3/4">Negative margin demo:</p>
+            <p className="fl-text-xs/sm text-slate-500 fl-mb-3/4">
+              Negative margin demo:
+            </p>
             <div className="bg-slate-800 rounded-lg p-4">
-              <div className="bg-pink-500/30 fl-p-3/5 rounded text-center fl-text-sm/base">Reference</div>
+              <div className="bg-pink-500/30 fl-p-3/5 rounded text-center fl-text-sm/base">
+                Reference
+              </div>
               <div className="neg-fl-mt-2/6 bg-pink-500/60 fl-p-3/5 rounded text-center fl-text-sm/base border-2 border-pink-400">
                 Overlapping with neg-fl-mt
               </div>
@@ -50,9 +58,12 @@ export default function Advanced() {
           Arbitrary Values
         </h3>
         <p className="fl-text-sm/base text-slate-400 fl-mb-4/6">
-          Use bracket notation for precise control: <InlineCode className="text-purple-400 bg-purple-500/10">[min/max]</InlineCode>
+          Use bracket notation for precise control:{" "}
+          <InlineCode className="text-purple-400 bg-purple-500/10">
+            [min/max]
+          </InlineCode>
         </p>
-        
+
         <div className="grid lg:grid-cols-2 fl-gap-4/6 fl-mb-4/6">
           <CodeBlock
             language="html"
@@ -81,11 +92,23 @@ export default function Advanced() {
           <div className="flex fl-gap-3/4">
             <span className="fl-text-lg/xl">⚠️</span>
             <div>
-              <h4 className="fl-text-sm/base font-medium text-amber-300 fl-mb-1/2">Unit Validation</h4>
+              <h4 className="fl-text-sm/base font-medium text-amber-300 fl-mb-1/2">
+                Unit Validation
+              </h4>
               <p className="fl-text-xs/sm text-slate-400">
-                Both values must use the <strong className="text-amber-300">same unit</strong>. 
-                Mismatched units like <InlineCode className="text-red-400">[1rem/16px]</InlineCode> will be rejected.
-                Use <InlineCode className="text-emerald-400">[1rem/2rem]</InlineCode> or <InlineCode className="text-emerald-400">[16px/32px]</InlineCode> instead.
+                Both values must use the{" "}
+                <strong className="text-amber-300">same unit</strong>.
+                Mismatched units like{" "}
+                <InlineCode className="text-red-400">[1rem/16px]</InlineCode>{" "}
+                will be rejected. Use{" "}
+                <InlineCode className="text-emerald-400">
+                  [1rem/2rem]
+                </InlineCode>{" "}
+                or{" "}
+                <InlineCode className="text-emerald-400">
+                  [16px/32px]
+                </InlineCode>{" "}
+                instead.
               </p>
             </div>
           </div>
@@ -101,7 +124,7 @@ export default function Advanced() {
         <p className="fl-text-sm/base text-slate-400 fl-mb-4/6">
           Combine fluid utilities with Tailwind's responsive prefixes:
         </p>
-        
+
         <div className="grid lg:grid-cols-2 fl-gap-4/6">
           <CodeBlock
             language="html"
@@ -117,10 +140,14 @@ export default function Advanced() {
             <p className="fl-text-xs/sm text-slate-500 fl-mb-3/4">Result:</p>
             <div className="fl-p-2/4 md:fl-p-4/8 lg:fl-p-6/12 bg-teal-500/20 border border-teal-500/50 rounded-lg">
               <div className="bg-teal-500/30 fl-p-2/3 rounded text-center">
-                <span className="fl-text-sm/lg text-teal-300">Responsive + Fluid</span>
+                <span className="fl-text-sm/lg text-teal-300">
+                  Responsive + Fluid
+                </span>
                 <p className="fl-text-xs/sm text-teal-200 mt-1">
                   <span className="md:hidden">Mobile: 2/4</span>
-                  <span className="hidden md:inline lg:hidden">Tablet: 4/8</span>
+                  <span className="hidden md:inline lg:hidden">
+                    Tablet: 4/8
+                  </span>
                   <span className="hidden lg:inline">Desktop: 6/12</span>
                 </p>
               </div>
@@ -131,63 +158,107 @@ export default function Advanced() {
 
       {/* Supported Utilities */}
       <div>
-        <h3 className="fl-text-base/lg font-medium text-slate-200 fl-mb-3/4">All Supported Utilities</h3>
+        <h3 className="fl-text-base/lg font-medium text-slate-200 fl-mb-3/4">
+          All Supported Utilities
+        </h3>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 fl-gap-4/6">
           <UtilityCategory
             title="Spacing"
             color="cyan"
-            utilities={['fl-p', 'fl-px', 'fl-py', 'fl-pt/r/b/l', 'fl-m', 'fl-mx', 'fl-my', 'fl-mt/r/b/l']}
+            utilities={[
+              "fl-p",
+              "fl-px",
+              "fl-py",
+              "fl-pt/r/b/l",
+              "fl-m",
+              "fl-mx",
+              "fl-my",
+              "fl-mt/r/b/l",
+            ]}
           />
           <UtilityCategory
             title="Typography"
             color="violet"
-            utilities={['fl-text', 'fl-leading', 'fl-tracking']}
+            utilities={["fl-text", "fl-leading", "fl-tracking"]}
           />
           <UtilityCategory
             title="Sizing"
             color="emerald"
-            utilities={['fl-w', 'fl-h', 'fl-size', 'fl-min-w', 'fl-max-w', 'fl-min-h', 'fl-max-h']}
+            utilities={[
+              "fl-w",
+              "fl-h",
+              "fl-size",
+              "fl-min-w",
+              "fl-max-w",
+              "fl-min-h",
+              "fl-max-h",
+            ]}
           />
           <UtilityCategory
             title="Layout"
             color="amber"
-            utilities={['fl-gap', 'fl-gap-x', 'fl-gap-y', 'fl-inset', 'fl-top/right/bottom/left', 'fl-space-x/y']}
+            utilities={[
+              "fl-gap",
+              "fl-gap-x",
+              "fl-gap-y",
+              "fl-inset",
+              "fl-top/right/bottom/left",
+              "fl-space-x/y",
+            ]}
           />
           <UtilityCategory
             title="Border"
             color="rose"
-            utilities={['fl-rounded', 'fl-rounded-t/r/b/l', 'fl-rounded-tl/tr/br/bl', 'fl-border']}
+            utilities={[
+              "fl-rounded",
+              "fl-rounded-t/r/b/l",
+              "fl-rounded-tl/tr/br/bl",
+              "fl-border",
+            ]}
           />
           <UtilityCategory
             title="Transform"
             color="sky"
-            utilities={['fl-translate-x', 'fl-translate-y', 'fl-scroll-m', 'fl-scroll-p', 'fl-basis']}
+            utilities={[
+              "fl-translate-x",
+              "fl-translate-y",
+              "fl-scroll-m",
+              "fl-scroll-p",
+              "fl-basis",
+            ]}
           />
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 function UtilityCategory({ title, color, utilities }) {
   const colorClasses = {
-    cyan: 'border-cyan-800/30 text-cyan-400',
-    violet: 'border-violet-800/30 text-violet-400',
-    emerald: 'border-emerald-800/30 text-emerald-400',
-    amber: 'border-amber-800/30 text-amber-400',
-    rose: 'border-rose-800/30 text-rose-400',
-    sky: 'border-sky-800/30 text-sky-400',
-  }
+    cyan: "border-cyan-800/30 text-cyan-400",
+    violet: "border-violet-800/30 text-violet-400",
+    emerald: "border-emerald-800/30 text-emerald-400",
+    amber: "border-amber-800/30 text-amber-400",
+    rose: "border-rose-800/30 text-rose-400",
+    sky: "border-sky-800/30 text-sky-400",
+  };
 
   return (
-    <div className={`bg-slate-900/50 border ${colorClasses[color].split(' ')[0]} fl-rounded-lg/xl fl-p-3/5`}>
-      <h4 className={`fl-text-sm/base font-medium ${colorClasses[color].split(' ')[1]} fl-mb-2/3`}>{title}</h4>
+    <div
+      className={`bg-slate-900/50 border ${colorClasses[color].split(" ")[0]} fl-rounded-lg/xl fl-p-3/5`}
+    >
+      <h4
+        className={`fl-text-sm/base font-medium ${colorClasses[color].split(" ")[1]} fl-mb-2/3`}
+      >
+        {title}
+      </h4>
       <ul className="fl-space-y-0.5/1 fl-text-xs/sm text-slate-400">
         {utilities.map((util, i) => (
-          <li key={i}><code>{util}</code></li>
+          <li key={i}>
+            <code>{util}</code>
+          </li>
         ))}
       </ul>
     </div>
-  )
+  );
 }
-

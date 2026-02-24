@@ -1,10 +1,12 @@
-import CodeBlock from './CodeBlock'
+import CodeBlock from "./CodeBlock";
 
 export default function Installation() {
   return (
     <section id="installation" className="fl-mb-12/20 scroll-mt-6">
-      <h2 className="fl-text-xl/3xl font-semibold text-white fl-mb-4/6">Installation</h2>
-      
+      <h2 className="fl-text-xl/3xl font-semibold text-white fl-mb-4/6">
+        Installation
+      </h2>
+
       <p className="fl-text-sm/base text-slate-400 fl-mb-4/6">
         Install the package via npm, pnpm, or yarn:
       </p>
@@ -26,7 +28,8 @@ yarn add fluid-tailwindcss`}
           TailwindCSS v4 (CSS-first)
         </h3>
         <p className="fl-text-sm/base text-slate-400 fl-mb-3/4">
-          Add the plugin to your CSS file using the <code className="text-cyan-400">@plugin</code> directive:
+          Add the plugin to your CSS file using the{" "}
+          <code className="text-cyan-400">@plugin</code> directive:
         </p>
         <CodeBlock
           language="css"
@@ -63,6 +66,5 @@ yarn add fluid-tailwindcss`}
         />
       </div>
     </section>
-  )
+  );
 }
-
