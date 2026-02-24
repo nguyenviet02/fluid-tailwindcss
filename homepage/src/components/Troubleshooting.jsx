@@ -1,10 +1,12 @@
-import CodeBlock, { InlineCode } from './CodeBlock'
+import CodeBlock, { InlineCode } from "./CodeBlock";
 
 export default function Troubleshooting() {
   return (
     <section id="troubleshooting" className="fl-mb-12/20 scroll-mt-6">
-      <h2 className="fl-text-xl/3xl font-semibold text-white fl-mb-4/6">Troubleshooting</h2>
-      
+      <h2 className="fl-text-xl/3xl font-semibold text-white fl-mb-4/6">
+        Troubleshooting
+      </h2>
+
       <p className="fl-text-sm/base text-slate-400 fl-mb-6/8">
         Common issues and their solutions.
       </p>
@@ -26,7 +28,8 @@ export default function Troubleshooting() {
 @plugin "fluid-tailwindcss";`}
               />
               <p className="fl-text-xs/sm text-slate-400 fl-mt-3/4">
-                Also check that your content paths include files using fluid utilities.
+                Also check that your content paths include files using fluid
+                utilities.
               </p>
             </>
           }
@@ -38,20 +41,26 @@ export default function Troubleshooting() {
           solution={
             <>
               <ol className="fl-text-xs/sm text-slate-400 fl-space-y-2/3 list-decimal list-inside">
-                <li>Install the latest{' '}
-                  <a 
-                    href="https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss" 
-                    target="_blank" 
+                <li>
+                  Install the latest{" "}
+                  <a
+                    href="https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-cyan-400 underline underline-offset-2"
                   >
                     Tailwind CSS IntelliSense
-                  </a>{' '}
+                  </a>{" "}
                   extension
                 </li>
                 <li>Restart VS Code after installing the plugin</li>
-                <li>Check that your CSS file is being recognized by IntelliSense</li>
-                <li>Verify the plugin is loading without errors in the Tailwind output</li>
+                <li>
+                  Check that your CSS file is being recognized by IntelliSense
+                </li>
+                <li>
+                  Verify the plugin is loading without errors in the Tailwind
+                  output
+                </li>
               </ol>
             </>
           }
@@ -67,12 +76,20 @@ export default function Troubleshooting() {
               </p>
               <div className="grid md:grid-cols-2 fl-gap-3/4">
                 <div className="bg-rose-500/5 border border-rose-500/20 fl-rounded-md/lg fl-p-3/4">
-                  <div className="fl-text-xs/sm text-rose-300 fl-mb-1/2">✗ Wrong</div>
-                  <code className="fl-text-xs/sm text-slate-400">fl-p-[1rem/16px]</code>
+                  <div className="fl-text-xs/sm text-rose-300 fl-mb-1/2">
+                    ✗ Wrong
+                  </div>
+                  <code className="fl-text-xs/sm text-slate-400">
+                    fl-p-[1rem/16px]
+                  </code>
                 </div>
                 <div className="bg-emerald-500/5 border border-emerald-500/20 fl-rounded-md/lg fl-p-3/4">
-                  <div className="fl-text-xs/sm text-emerald-300 fl-mb-1/2">✓ Correct</div>
-                  <code className="fl-text-xs/sm text-slate-400">fl-p-[1rem/2rem]</code>
+                  <div className="fl-text-xs/sm text-emerald-300 fl-mb-1/2">
+                    ✓ Correct
+                  </div>
+                  <code className="fl-text-xs/sm text-slate-400">
+                    fl-p-[1rem/2rem]
+                  </code>
                 </div>
               </div>
             </>
@@ -103,7 +120,8 @@ pnpm add fluid-tailwindcss --ignore-peer-deps`}
           solution={
             <>
               <p className="fl-text-xs/sm text-slate-400 fl-mb-3/4">
-                Use the provided <InlineCode>twMerge</InlineCode> from the package:
+                Use the provided <InlineCode>twMerge</InlineCode> from the
+                package:
               </p>
               <CodeBlock
                 language="javascript"
@@ -148,34 +166,39 @@ const customTwMerge = extendTailwindMerge(withFluid)`}
 
       {/* Still need help */}
       <div className="bg-slate-900/50 border border-slate-800 fl-rounded-lg/xl fl-p-4/6 fl-mt-8/12">
-        <h3 className="fl-text-base/lg font-medium text-slate-200 fl-mb-2/3">Still need help?</h3>
+        <h3 className="fl-text-base/lg font-medium text-slate-200 fl-mb-2/3">
+          Still need help?
+        </h3>
         <p className="fl-text-sm/base text-slate-400">
-          Open an issue on{' '}
-          <a 
-            href="https://github.com/nguyenviet02/fluid-tailwindcss/issues" 
-            target="_blank" 
+          Open an issue on{" "}
+          <a
+            href="https://github.com/nguyenviet02/fluid-tailwindcss/issues"
+            target="_blank"
             rel="noopener noreferrer"
             className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
           >
             GitHub
-          </a>{' '}
+          </a>{" "}
           with a reproduction example and we'll help you out.
         </p>
       </div>
     </section>
-  )
+  );
 }
 
 function TroubleshootItem({ title, description, solution }) {
   return (
     <div className="bg-slate-900/30 border border-slate-800 fl-rounded-lg/xl fl-p-4/6">
-      <h3 className="fl-text-sm/base font-medium text-slate-200 fl-mb-1/2">{title}</h3>
+      <h3 className="fl-text-sm/base font-medium text-slate-200 fl-mb-1/2">
+        {title}
+      </h3>
       <p className="fl-text-xs/sm text-slate-500 fl-mb-3/4">{description}</p>
       <div className="border-t border-slate-800 fl-pt-3/4">
-        <div className="fl-text-xs/sm text-cyan-400 fl-mb-2/3 font-medium">Solution:</div>
+        <div className="fl-text-xs/sm text-cyan-400 fl-mb-2/3 font-medium">
+          Solution:
+        </div>
         {solution}
       </div>
     </div>
-  )
+  );
 }
-

@@ -39,9 +39,7 @@ TailwindCSS v4 uses a CSS-first approach. Add the plugin using the `@plugin` dir
 ### 2. Use fluid utilities in your HTML
 
 ```html
-<h1 class="fl-text-2xl/5xl fl-p-4/8">
-  Fluid Typography and Spacing
-</h1>
+<h1 class="fl-text-2xl/5xl fl-p-4/8">Fluid Typography and Spacing</h1>
 ```
 
 This generates:
@@ -78,20 +76,20 @@ Add the plugin to your `tailwind.config.js`:
 ```javascript
 // tailwind.config.js
 module.exports = {
-  content: ['./src/**/*.{html,js,jsx,ts,tsx}'],
+  content: ["./src/**/*.{html,js,jsx,ts,tsx}"],
   theme: {
     extend: {},
   },
   plugins: [
-    require('fluid-tailwindcss')({
+    require("fluid-tailwindcss")({
       minViewport: 375,
       maxViewport: 1440,
       useRem: true,
       rootFontSize: 16,
       checkAccessibility: true,
-    })
-  ]
-}
+    }),
+  ],
+};
 ```
 
 ### Usage in v3
@@ -99,9 +97,7 @@ module.exports = {
 The fluid utilities work the same way in v3:
 
 ```html
-<h1 class="fl-text-2xl/5xl fl-p-4/8">
-  Fluid Typography and Spacing
-</h1>
+<h1 class="fl-text-2xl/5xl fl-p-4/8">Fluid Typography and Spacing</h1>
 ```
 
 > **Note:** The CSS-based `@plugin` directive is **not available** in TailwindCSS v3. You must use the JavaScript configuration approach shown above.
@@ -115,6 +111,7 @@ fl-{utility}-{min}/{max}
 ```
 
 Where:
+
 - `fl-` is the prefix that indicates a fluid utility
 - `{utility}` is any supported Tailwind utility (p, m, text, w, h, gap, etc.)
 - `{min}` is the minimum value from the Tailwind scale
@@ -122,13 +119,13 @@ Where:
 
 ### Examples
 
-| Class | Description |
-|-------|-------------|
-| `fl-p-4/8` | Fluid padding from 1rem to 2rem |
+| Class              | Description                         |
+| ------------------ | ----------------------------------- |
+| `fl-p-4/8`         | Fluid padding from 1rem to 2rem     |
 | `fl-text-base/2xl` | Fluid font-size from 1rem to 1.5rem |
-| `fl-m-2/6` | Fluid margin from 0.5rem to 1.5rem |
-| `fl-gap-4/8` | Fluid gap from 1rem to 2rem |
-| `fl-w-64/96` | Fluid width from 16rem to 24rem |
+| `fl-m-2/6`         | Fluid margin from 0.5rem to 1.5rem  |
+| `fl-gap-4/8`       | Fluid gap from 1rem to 2rem         |
+| `fl-w-64/96`       | Fluid width from 16rem to 24rem     |
 
 ## Configuration
 
@@ -153,8 +150,8 @@ The plugin uses these defaults:
 ```css
 @import "tailwindcss";
 @plugin "fluid-tailwindcss" {
-  minViewport: 320;
-  maxViewport: 1920;
+  minviewport: 320;
+  maxviewport: 1920;
 }
 ```
 
@@ -172,87 +169,87 @@ If you need JavaScript-based configuration, you can use the `@config` directive 
 // tailwind.config.js
 module.exports = {
   plugins: [
-    require('fluid-tailwindcss')({
+    require("fluid-tailwindcss")({
       minViewport: 320,
       maxViewport: 1920,
       useRem: true,
       rootFontSize: 16,
       checkAccessibility: true,
-    })
-  ]
-}
+    }),
+  ],
+};
 ```
 
 ## Supported Utilities
 
 ### Spacing
 
-| Utility | CSS Property |
-|---------|-------------|
-| `fl-p` | `padding` |
-| `fl-px` | `padding-left`, `padding-right` |
-| `fl-py` | `padding-top`, `padding-bottom` |
-| `fl-pt`, `fl-pr`, `fl-pb`, `fl-pl` | Individual padding |
-| `fl-ps`, `fl-pe` | `padding-inline-start`, `padding-inline-end` |
-| `fl-m` | `margin` |
-| `fl-mx` | `margin-left`, `margin-right` |
-| `fl-my` | `margin-top`, `margin-bottom` |
-| `fl-mt`, `fl-mr`, `fl-mb`, `fl-ml` | Individual margin |
-| `fl-ms`, `fl-me` | `margin-inline-start`, `margin-inline-end` |
+| Utility                            | CSS Property                                 |
+| ---------------------------------- | -------------------------------------------- |
+| `fl-p`                             | `padding`                                    |
+| `fl-px`                            | `padding-left`, `padding-right`              |
+| `fl-py`                            | `padding-top`, `padding-bottom`              |
+| `fl-pt`, `fl-pr`, `fl-pb`, `fl-pl` | Individual padding                           |
+| `fl-ps`, `fl-pe`                   | `padding-inline-start`, `padding-inline-end` |
+| `fl-m`                             | `margin`                                     |
+| `fl-mx`                            | `margin-left`, `margin-right`                |
+| `fl-my`                            | `margin-top`, `margin-bottom`                |
+| `fl-mt`, `fl-mr`, `fl-mb`, `fl-ml` | Individual margin                            |
+| `fl-ms`, `fl-me`                   | `margin-inline-start`, `margin-inline-end`   |
 
 ### Typography
 
-| Utility | CSS Property |
-|---------|-------------|
-| `fl-text` | `font-size` |
-| `fl-leading` | `line-height` |
+| Utility       | CSS Property     |
+| ------------- | ---------------- |
+| `fl-text`     | `font-size`      |
+| `fl-leading`  | `line-height`    |
 | `fl-tracking` | `letter-spacing` |
 
 ### Sizing
 
-| Utility | CSS Property |
-|---------|-------------|
-| `fl-w` | `width` |
-| `fl-h` | `height` |
-| `fl-size` | `width` + `height` |
-| `fl-min-w` | `min-width` |
-| `fl-max-w` | `max-width` |
-| `fl-min-h` | `min-height` |
-| `fl-max-h` | `max-height` |
+| Utility    | CSS Property       |
+| ---------- | ------------------ |
+| `fl-w`     | `width`            |
+| `fl-h`     | `height`           |
+| `fl-size`  | `width` + `height` |
+| `fl-min-w` | `min-width`        |
+| `fl-max-w` | `max-width`        |
+| `fl-min-h` | `min-height`       |
+| `fl-max-h` | `max-height`       |
 
 ### Layout
 
-| Utility | CSS Property |
-|---------|-------------|
-| `fl-gap` | `gap` |
-| `fl-gap-x` | `column-gap` |
-| `fl-gap-y` | `row-gap` |
-| `fl-inset` | `inset` |
-| `fl-top`, `fl-right`, `fl-bottom`, `fl-left` | Positioning |
-| `fl-space-x` | Space between (horizontal) |
-| `fl-space-y` | Space between (vertical) |
+| Utility                                      | CSS Property               |
+| -------------------------------------------- | -------------------------- |
+| `fl-gap`                                     | `gap`                      |
+| `fl-gap-x`                                   | `column-gap`               |
+| `fl-gap-y`                                   | `row-gap`                  |
+| `fl-inset`                                   | `inset`                    |
+| `fl-top`, `fl-right`, `fl-bottom`, `fl-left` | Positioning                |
+| `fl-space-x`                                 | Space between (horizontal) |
+| `fl-space-y`                                 | Space between (vertical)   |
 
 ### Border
 
-| Utility | CSS Property |
-|---------|-------------|
-| `fl-rounded` | `border-radius` |
-| `fl-rounded-t`, `fl-rounded-r`, `fl-rounded-b`, `fl-rounded-l` | Side radius |
-| `fl-rounded-tl`, `fl-rounded-tr`, `fl-rounded-br`, `fl-rounded-bl` | Corner radius |
-| `fl-border` | `border-width` |
+| Utility                                                            | CSS Property    |
+| ------------------------------------------------------------------ | --------------- |
+| `fl-rounded`                                                       | `border-radius` |
+| `fl-rounded-t`, `fl-rounded-r`, `fl-rounded-b`, `fl-rounded-l`     | Side radius     |
+| `fl-rounded-tl`, `fl-rounded-tr`, `fl-rounded-br`, `fl-rounded-bl` | Corner radius   |
+| `fl-border`                                                        | `border-width`  |
 
 ### Transform
 
-| Utility | CSS Property |
-|---------|-------------|
+| Utility          | CSS Property       |
+| ---------------- | ------------------ |
 | `fl-translate-x` | `--tw-translate-x` |
 | `fl-translate-y` | `--tw-translate-y` |
 
 ### Scroll
 
-| Utility | CSS Property |
-|---------|-------------|
-| `fl-scroll-m`, `fl-scroll-mx`, `fl-scroll-my` | Scroll margin |
+| Utility                                       | CSS Property   |
+| --------------------------------------------- | -------------- |
+| `fl-scroll-m`, `fl-scroll-mx`, `fl-scroll-my` | Scroll margin  |
 | `fl-scroll-p`, `fl-scroll-px`, `fl-scroll-py` | Scroll padding |
 
 ## Tailwind Merge Integration
@@ -262,37 +259,37 @@ The package includes first-class support for `tailwind-merge`. This ensures flui
 ### Basic Usage
 
 ```javascript
-import { twMerge } from 'fluid-tailwindcss/tailwind-merge'
+import { twMerge } from "fluid-tailwindcss/tailwind-merge";
 
 // Fluid utility wins (last one)
-twMerge('p-4', 'fl-p-4/8')  // => 'fl-p-4/8'
+twMerge("p-4", "fl-p-4/8"); // => 'fl-p-4/8'
 
 // Regular utility wins (last one)
-twMerge('fl-p-4/8', 'p-4')  // => 'p-4'
+twMerge("fl-p-4/8", "p-4"); // => 'p-4'
 
 // Different utilities are preserved
-twMerge('fl-p-4/8', 'fl-m-2/6', 'text-lg')  // => 'fl-p-4/8 fl-m-2/6 text-lg'
+twMerge("fl-p-4/8", "fl-m-2/6", "text-lg"); // => 'fl-p-4/8 fl-m-2/6 text-lg'
 ```
 
 ### Extending Your Own tailwind-merge
 
 ```javascript
-import { extendTailwindMerge } from 'tailwind-merge'
-import { withFluid } from 'fluid-tailwindcss/tailwind-merge'
+import { extendTailwindMerge } from "tailwind-merge";
+import { withFluid } from "fluid-tailwindcss/tailwind-merge";
 
 const twMerge = extendTailwindMerge(withFluid, {
   // Your additional config
-})
+});
 ```
 
 ### Creating a Custom Instance
 
 ```javascript
-import { createTwMerge } from 'fluid-tailwindcss/tailwind-merge'
+import { createTwMerge } from "fluid-tailwindcss/tailwind-merge";
 
 const twMerge = createTwMerge({
   // Additional tailwind-merge config
-})
+});
 ```
 
 ## How It Works
@@ -333,8 +330,9 @@ vw factor = 0.01502 * 100 = 1.502vw
 ```
 
 Result:
+
 ```css
-padding: clamp(1.5rem, 1.148rem + 1.502vw, 2.5rem)
+padding: clamp(1.5rem, 1.148rem + 1.502vw, 2.5rem);
 ```
 
 ## Accessibility
@@ -348,7 +346,7 @@ To disable accessibility checks:
 
 ```css
 @plugin "fluid-tailwindcss" {
-  checkAccessibility: false;
+  checkaccessibility: false;
 }
 ```
 
@@ -374,6 +372,7 @@ npm run test
 ### Versioning
 
 Follow semantic versioning:
+
 - **Patch** (1.0.x): Bug fixes
 - **Minor** (1.x.0): New features, backward compatible
 - **Major** (x.0.0): Breaking changes
@@ -387,6 +386,7 @@ npm version major  # 1.0.0 -> 2.0.0
 ## Browser Support
 
 CSS `clamp()` is supported in all modern browsers:
+
 - Chrome 79+
 - Firefox 75+
 - Safari 13.1+
@@ -399,7 +399,7 @@ For older browser support, consider using a PostCSS plugin like [postcss-clamp](
 The package is written in TypeScript and includes full type definitions. Import types as needed:
 
 ```typescript
-import type { FluidOptions, ResolvedFluidOptions } from 'fluid-tailwindcss'
+import type { FluidOptions, ResolvedFluidOptions } from "fluid-tailwindcss";
 ```
 
 ## Contributing
@@ -428,6 +428,7 @@ Learn more about the development journey and technical details:
 ## Credits
 
 Inspired by:
+
 - [fluid.tw](https://fluid.tw)
 - [tailwind-clamp](https://github.com/nicolas-cusan/tailwind-clamp)
 - [Utopia](https://utopia.fyi)
@@ -437,4 +438,3 @@ Inspired by:
 - [TailwindCSS](https://tailwindcss.com)
 - [tailwind-merge](https://github.com/dcastil/tailwind-merge)
 - [clamp calculator](https://min-max-calculator.9elements.com/)
-

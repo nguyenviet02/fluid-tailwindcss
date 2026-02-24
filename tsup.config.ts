@@ -1,17 +1,16 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: {
-    index: 'src/index.ts',
-    'tailwind-merge/index': 'src/tailwind-merge/index.ts',
+    index: "src/index.ts",
+    "tailwind-merge/index": "src/tailwind-merge/index.ts",
   },
-  format: ['cjs', 'esm'],
+  format: ["cjs", "esm"],
   dts: true,
   splitting: false,
   sourcemap: true,
   clean: true,
   treeshake: true,
   minify: false,
-  external: ['tailwindcss', 'tailwind-merge'],
-})
-
+  external: ["tailwindcss", "tailwind-merge"],
+});
