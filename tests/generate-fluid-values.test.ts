@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { extractUnit } from "../src/index";
+import fluidPlugin, { extractUnit } from "../src/index";
 import {
   fluidUtilities,
   defaultSpacing,
@@ -16,6 +16,98 @@ import {
  */
 
 // ─── extractUnit tests ─────────────────────────────────────────────────
+
+function createUtilities() {
+  const utilities: Record<
+    string,
+    (value: string, extra: { modifier: string | null }) => Record<string, unknown>
+  > = {};
+  const options: Array<{
+    values?: Record<string, string>;
+    modifiers?: "any" | Record<string, string>;
+  }> = [];
+
+  fluidPlugin().handler({
+    matchUtilities(newUtilities, newOptions) {
+      Object.assign(utilities, newUtilities);
+      options.push(newOptions ?? {});
+    },
+    theme() {
+      return undefined;
+    },
+    config() {
+      return undefined;
+    },
+  });
+
+  return { utilities, options };
+}
+
+describe("issue #8 non-default numeric spacing values", () => {
+  it("registers spacing utilities with bare numeric matching", () => {
+    const { options } = createUtilities();
+
+    expect(
+      options.some((option) => option.values?.__BARE_VALUE__ !== undefined),
+    ).toBe(true);
+  });
+
+  it("generates CSS for fl-mt-6/15", () => {
+    const { utilities } = createUtilities();
+    const result = utilities["fl-mt"]("6", { modifier: "15" });
+
+    expect(result["margin-top"]).toContain("clamp(");
+    expect(result["margin-top"]).toContain("1.5rem");
+    expect(result["margin-top"]).toContain("3.75rem");
+  });
+
+  it("generates CSS for fl-mt-4.5/10", () => {
+    const { utilities } = createUtilities();
+    const result = utilities["fl-mt"]("4.5", { modifier: "10" });
+
+    expect(result["margin-top"]).toContain("clamp(");
+    expect(result["margin-top"]).toContain("1.125rem");
+    expect(result["margin-top"]).toContain("2.5rem");
+  });
+
+  it("registers decimal spacing values as bare values for Tailwind v4", () => {
+    const { options } = createUtilities();
+    const bareValue = options.find(
+      (option) => option.values?.__BARE_VALUE__ !== undefined,
+    )?.values?.__BARE_VALUE__;
+
+    expect(bareValue?.({ value: "4.5" })).toBe("4.5");
+    expect(bareValue?.({ value: "10" })).toBe("10");
+    expect(bareValue?.({ value: "bad" })).toBeUndefined();
+  });
+
+  it("generates CSS for fl-pb-10/30", () => {
+    const { utilities } = createUtilities();
+    const result = utilities["fl-pb"]("10", { modifier: "30" });
+
+    expect(result["padding-bottom"]).toContain("clamp(");
+    expect(result["padding-bottom"]).toContain("2.5rem");
+    expect(result["padding-bottom"]).toContain("7.5rem");
+  });
+
+  it("generates negative CSS for neg-fl-mt-6/15", () => {
+    const { utilities } = createUtilities();
+    const result = utilities["neg-fl-mt"]("6", { modifier: "15" });
+
+    expect(result["margin-top"]).toContain("clamp(");
+    expect(result["margin-top"]).toContain("-3.75rem");
+    expect(result["margin-top"]).toContain("-1.5rem");
+  });
+
+  it("keeps scale-based classes working", () => {
+    const { utilities } = createUtilities();
+    const result = utilities["fl-p"]("4", { modifier: "8" });
+
+    expect(result.padding).toContain("clamp(");
+    expect(result.padding).toContain("1rem");
+    expect(result.padding).toContain("2rem");
+  });
+});
 
 describe("extractUnit", () => {
   describe("string values", () => {
