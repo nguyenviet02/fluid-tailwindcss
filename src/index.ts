@@ -273,6 +273,26 @@ function createFluidDeclaration(
   return result;
 }
 
+type MatchOptions = Parameters<PluginAPI["matchUtilities"]>[1];
+type MatchValues = NonNullable<MatchOptions>["values"];
+
+function getMatchOptions(
+  scale: (typeof fluidUtilities)[string]["scale"],
+  values: Record<string, string>,
+): MatchOptions {
+  if (scale === "spacing") {
+    return {
+      values: {
+        __BARE_VALUE__: ({ value }: { value: string }) =>
+          /^-?\d+(\.\d+)?$/.test(value) ? value : undefined,
+      } as unknown as MatchValues,
+      modifiers: "any",
+    };
+  }
+
+  return { values, modifiers: "any" };
+}
+
 /**
  * The main fluid-tailwindcss plugin
  */
@@ -429,10 +449,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
           {
             [fullUtilityName]: createUtilityHandler(false),
           },
-          {
-            values: fluidValues,
-            modifiers: "any",
-          },
+          getMatchOptions(utilityDef.scale, fluidValues),
         );
 
         // Register the negative utility with "neg" prefix if supported
@@ -446,10 +463,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             {
               [negativeUtilityName]: createUtilityHandler(true),
             },
-            {
-              values: fluidValues,
-              modifiers: "any",
-            },
+            getMatchOptions(utilityDef.scale, fluidValues),
           );
         }
       }
@@ -542,15 +556,14 @@ function registerSpaceUtility(
     };
   };
 
+  const matchOptions = getMatchOptions(_utilityDef.scale, fluidValues);
+
   // Register positive utility
   matchUtilities(
     {
       [fullUtilityName]: createSpaceHandler(false),
     },
-    {
-      values: fluidValues,
-      modifiers: "any",
-    },
+    matchOptions,
   );
 
   // Register negative utility with "neg-" prefix
@@ -559,10 +572,7 @@ function registerSpaceUtility(
     {
       [negativeUtilityName]: createSpaceHandler(true),
     },
-    {
-      values: fluidValues,
-      modifiers: "any",
-    },
+    matchOptions,
   );
 }
 
@@ -642,15 +652,14 @@ function registerTranslateUtility(
     };
   };
 
+  const matchOptions = getMatchOptions(utilityDef.scale, fluidValues);
+
   // Register positive utility
   matchUtilities(
     {
       [fullUtilityName]: createTranslateHandler(false),
     },
-    {
-      values: fluidValues,
-      modifiers: "any",
-    },
+    matchOptions,
   );
 
   // Register negative utility with "neg-" prefix if supported
@@ -660,10 +669,7 @@ function registerTranslateUtility(
       {
         [negativeUtilityName]: createTranslateHandler(true),
       },
-      {
-        values: fluidValues,
-        modifiers: "any",
-      },
+      matchOptions,
     );
   }
 }
