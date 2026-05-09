@@ -1,0 +1,49 @@
+# fluid-tailwindcss
+> Tailwind CSS plugin for fluid responsive utilities using CSS clamp(), with Tailwind CSS v4 support and tailwind-merge integration.
+
+## Core Files
+
+- `src/index.ts`: Main plugin entry point, option normalization, Tailwind `matchUtilities` registration, public exports.
+- `src/clamp.ts`: CSS `clamp()` calculation, fluid parsing, validation integration, accessibility checks.
+- `src/length.ts`: CSS length parsing and rem/px conversion.
+- `src/utilities.ts`: Source of truth for supported `fl-*` utility names and CSS property mappings.
+- `src/validation.ts`: Unit matching, breakpoint/value validation, arbitrary value helpers.
+- `src/errors.ts`: Typed error codes and `FluidError` helpers.
+- `src/types.ts`: Public and internal TypeScript types.
+- `src/tailwind-merge/index.ts`: Fluid class validators and `tailwind-merge` class group configuration.
+- `tests/`: Vitest tests covering plugin behavior, clamp math, validation, merge behavior, and performance.
+- `homepage/`: Vite React documentation/demo site using the local package.
+
+## Key Concepts
+
+- Fluid utility syntax: `fl-{utility}-{min}/{max}`.
+- Example: `fl-p-4/8` emits padding that scales from Tailwind spacing `4` to `8`.
+- Tailwind v4 sends slash syntax through `extra.modifier`; handlers reconstruct `value/modifier`.
+- Negative plugin utilities use `neg-fl-*` instead of `-fl-*`.
+- Clamp math converts supported units to rem internally, then emits rem or px depending on options.
+- `generateFluidValues()` intentionally registers O(n) values, not O(n²) min/max pairs.
+- `src/utilities.ts` and `src/tailwind-merge/index.ts` must stay synchronized.
+
+## Main Commands
+
+```bash
+pnpm test:run
+pnpm lint
+pnpm build
+```
+
+Homepage:
+
+```bash
+cd homepage
+pnpm dev
+pnpm build
+pnpm lint
+```
+
+## Do Not
+
+- Do not edit `dist/` manually.
+- Do not remove lowercase option aliases without treating it as a breaking compatibility change.
+- Do not add a new `fl-*` utility without updating merge behavior and tests.
+- Do not reintroduce O(n²) utility pair generation.
