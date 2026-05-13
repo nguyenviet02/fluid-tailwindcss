@@ -16,6 +16,7 @@ import {
 import { fluidUtilities, getThemePath, getDefaultScale } from "./utilities";
 import { parseArbitraryValue } from "./validation";
 import { Length } from "./length";
+import { parseBreakpointRange, resolveScreens } from "./breakpoints";
 
 // Re-export types for consumers
 export type {
@@ -31,6 +32,8 @@ export type {
   FluidValuePair,
   PerUtilityBreakpoints,
 } from "./types";
+
+export type { BreakpointRange } from "./breakpoints";
 
 // Export clamp utilities
 export {
@@ -56,6 +59,9 @@ export { fluidUtilities, getDefaultScale } from "./utilities";
 // Export Length class for advanced usage
 export { Length } from "./length";
 export type { RawValue } from "./length";
+
+// Export breakpoint utilities
+export { parseBreakpointRange, resolveScreens } from "./breakpoints";
 
 // Export error handling utilities
 export { FluidError, errorCodes, throwError, ok, err } from "./errors";
@@ -301,6 +307,8 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
     const resolvedOptions = resolveOptions(options);
 
     return ({ matchUtilities, theme }) => {
+      const screens = resolveScreens(theme);
+
       // Register each fluid utility
       for (const [utilityName, utilityDef] of Object.entries(fluidUtilities)) {
         const themePath = getThemePath(utilityDef.scale);
@@ -327,6 +335,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             fluidValues,
             resolvedOptions,
             matchUtilities,
+            screens,
           );
           continue;
         }
@@ -343,6 +352,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             fluidValues,
             resolvedOptions,
             matchUtilities,
+            screens,
           );
           continue;
         }
@@ -365,8 +375,15 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             const effectiveValue =
               extra.modifier != null ? `${value}/${extra.modifier}` : value;
 
+            // Extract breakpoint range if present (e.g. "4/8@md/lg")
+            const rangeResult = parseBreakpointRange(effectiveValue, screens);
+            const fluidInput = rangeResult ? rangeResult.fluidValue : effectiveValue;
+            const bpOverrides = rangeResult
+              ? { minViewport: rangeResult.minViewport, maxViewport: rangeResult.maxViewport }
+              : {};
+
             // Handle arbitrary values like [1rem/2rem]
-            const arbitraryValue = parseArbitraryValue(effectiveValue);
+            const arbitraryValue = parseArbitraryValue(fluidInput);
             if (arbitraryValue) {
               const arbitraryParsed = parseFluidString(arbitraryValue);
               if (!arbitraryParsed) return {};
@@ -389,12 +406,12 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
                 arbitraryParsed.min,
                 arbitraryParsed.max,
                 resolvedOptions,
-                { negate },
+                { negate, ...bpOverrides },
               );
               return createFluidDeclaration(utilityDef.property, result);
             }
 
-            const parsed = parseFluidString(effectiveValue);
+            const parsed = parseFluidString(fluidInput);
             if (!parsed) return {};
 
             // Resolve theme values
@@ -404,9 +421,6 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             if (!minResolved || !maxResolved) return {};
 
             // Validate units match if validation is enabled
-            // With pre-filtered generateFluidValues() this should rarely fire
-            // for theme-based pairs, but still catches edge cases where the
-            // resolved value differs from what extractUnit() predicted.
             if (resolvedOptions.validateUnits) {
               const validation = validateFluidUnits(minResolved, maxResolved);
               if (!validation.valid) {
@@ -436,7 +450,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
               minResolved,
               maxResolved,
               resolvedOptions,
-              { negate },
+              { negate, ...bpOverrides },
             );
 
             // Create the CSS declaration
@@ -485,6 +499,7 @@ function registerSpaceUtility(
   fluidValues: Record<string, string>,
   resolvedOptions: ResolvedFluidOptions,
   matchUtilities: PluginAPI["matchUtilities"],
+  screens: Record<string, number>,
 ) {
   const isX = utilityName === "fl-space-x";
   const marginProp = isX ? "margin-left" : "margin-top";
@@ -501,8 +516,15 @@ function registerSpaceUtility(
       const effectiveValue =
         extra.modifier != null ? `${value}/${extra.modifier}` : value;
 
+      // Extract breakpoint range if present
+      const rangeResult = parseBreakpointRange(effectiveValue, screens);
+      const fluidInput = rangeResult ? rangeResult.fluidValue : effectiveValue;
+      const bpOverrides = rangeResult
+        ? { minViewport: rangeResult.minViewport, maxViewport: rangeResult.maxViewport }
+        : {};
+
       // Handle arbitrary values
-      const arbitraryValue = parseArbitraryValue(effectiveValue);
+      const arbitraryValue = parseArbitraryValue(fluidInput);
       if (arbitraryValue) {
         const arbitraryParsed = parseFluidString(arbitraryValue);
         if (!arbitraryParsed) return {};
@@ -519,7 +541,7 @@ function registerSpaceUtility(
           arbitraryParsed.min,
           arbitraryParsed.max,
           resolvedOptions,
-          { negate },
+          { negate, ...bpOverrides },
         );
         return {
           "& > :not([hidden]) ~ :not([hidden])": {
@@ -528,7 +550,7 @@ function registerSpaceUtility(
         };
       }
 
-      const parsed = parseFluidString(effectiveValue);
+      const parsed = parseFluidString(fluidInput);
       if (!parsed) return {};
 
       const minResolved = resolveThemeValue(parsed.min, themeValues);
@@ -545,7 +567,7 @@ function registerSpaceUtility(
         minResolved,
         maxResolved,
         resolvedOptions,
-        { negate },
+        { negate, ...bpOverrides },
       );
 
       return {
@@ -586,6 +608,7 @@ function registerTranslateUtility(
   fluidValues: Record<string, string>,
   resolvedOptions: ResolvedFluidOptions,
   matchUtilities: PluginAPI["matchUtilities"],
+  screens: Record<string, number>,
 ) {
   // Build the utility name with optional prefix
   const fullUtilityName = resolvedOptions.prefix
@@ -599,8 +622,15 @@ function registerTranslateUtility(
       const effectiveValue =
         extra.modifier != null ? `${value}/${extra.modifier}` : value;
 
+      // Extract breakpoint range if present
+      const rangeResult = parseBreakpointRange(effectiveValue, screens);
+      const fluidInput = rangeResult ? rangeResult.fluidValue : effectiveValue;
+      const bpOverrides = rangeResult
+        ? { minViewport: rangeResult.minViewport, maxViewport: rangeResult.maxViewport }
+        : {};
+
       // Handle arbitrary values
-      const arbitraryValue = parseArbitraryValue(effectiveValue);
+      const arbitraryValue = parseArbitraryValue(fluidInput);
       if (arbitraryValue) {
         const arbitraryParsed = parseFluidString(arbitraryValue);
         if (!arbitraryParsed) return {};
@@ -617,7 +647,7 @@ function registerTranslateUtility(
           arbitraryParsed.min,
           arbitraryParsed.max,
           resolvedOptions,
-          { negate },
+          { negate, ...bpOverrides },
         );
         return {
           [utilityDef.property as string]: result,
@@ -625,7 +655,7 @@ function registerTranslateUtility(
         };
       }
 
-      const parsed = parseFluidString(effectiveValue);
+      const parsed = parseFluidString(fluidInput);
       if (!parsed) return {};
 
       const minResolved = resolveThemeValue(parsed.min, themeValues);
@@ -642,7 +672,7 @@ function registerTranslateUtility(
         minResolved,
         maxResolved,
         resolvedOptions,
-        { negate },
+        { negate, ...bpOverrides },
       );
 
       return {
