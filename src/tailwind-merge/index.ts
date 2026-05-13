@@ -2,16 +2,16 @@ import { extendTailwindMerge } from "tailwind-merge";
 import type { Config } from "tailwind-merge";
 
 /**
- * Regex pattern for fluid values: min/max format
- * Matches: 4/8, base/2xl, sm/lg, 0.5/1.5, etc.
+ * Regex pattern for fluid values: min/max format with optional breakpoint range
+ * Matches: 4/8, base/2xl, 0.5/1.5, 4/8--md-lg, 4/8--[768px-1024px], etc.
  */
-const fluidValuePattern = /^[\w.-]+\/[\w.-]+$/;
+const fluidValuePattern = /^[\w.-]+\/[\w.-]+(--[\w.-]+|--\[\d+px[-/]\d+px\])?$/;
 
 /**
- * Regex pattern for arbitrary fluid values: [min/max] format
- * Matches: [1rem/2rem], [16px/32px], etc.
+ * Regex pattern for arbitrary fluid values: [min/max] format with optional breakpoint range
+ * Matches: [1rem/2rem], [16px/32px], [1rem/2rem]--md-lg, etc.
  */
-const arbitraryFluidValuePattern = /^\[[\w.]+\/[\w.]+\]$/;
+const arbitraryFluidValuePattern = /^\[[\w.]+\/[\w.]+\](--[\w.-]+|--\[\d+px[-/]\d+px\])?$/;
 
 /**
  * Creates a validator function for fluid class values
