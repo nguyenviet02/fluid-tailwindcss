@@ -321,7 +321,7 @@ export const withFluid = {
       "fluid-me": ["me"],
 
       // Typography
-      "fluid-text": ["font-size"],
+      "fluid-text": ["font-size", "leading", "tracking"],
       "fluid-leading": ["leading"],
       "fluid-tracking": ["tracking"],
 
@@ -415,8 +415,8 @@ export const withFluid = {
       ms: ["fluid-ms"],
       me: ["fluid-me"],
       "font-size": ["fluid-text"],
-      leading: ["fluid-leading"],
-      tracking: ["fluid-tracking"],
+      leading: ["fluid-leading", "fluid-text"],
+      tracking: ["fluid-tracking", "fluid-text"],
       w: ["fluid-w"],
       h: ["fluid-h"],
       size: ["fluid-size"],
