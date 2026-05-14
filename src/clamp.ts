@@ -330,6 +330,60 @@ export function parseFluidString(
 }
 
 /**
+ * Companion typography values (line-height, letter-spacing) from a fontSize theme entry
+ */
+export interface FontSizeCompanions {
+  lineHeight?: string;
+  letterSpacing?: string;
+}
+
+/**
+ * Resolves a Tailwind v4 line-height companion value to an absolute length.
+ *
+ * Tailwind v4 stores line-height as:
+ *   - "calc(2.5 / 2.25)" — a ratio expressed as calc(absoluteLH / fontSize)
+ *   - "1" — a unitless ratio multiplier
+ *   - "1.5rem" — already absolute
+ *
+ * This function resolves calc() and unitless values to rem using the font-size.
+ */
+export function resolveLineHeightCompanion(
+  lineHeight: string,
+  fontSize: string,
+): string | null {
+  // Already has a unit — use as-is
+  const parsed = Length.parse(lineHeight);
+  if (parsed?.unit) return lineHeight;
+
+  // Try to evaluate calc(X / Y) pattern from Tailwind v4
+  const calcMatch = lineHeight.match(
+    /^calc\(\s*([\d.]+)\s*\/\s*([\d.]+)\s*\)$/,
+  );
+  if (calcMatch) {
+    const numerator = parseFloat(calcMatch[1]);
+    if (!isNaN(numerator) && numerator > 0) {
+      return `${numerator}rem`;
+    }
+  }
+
+  // Unitless ratio — multiply by font-size to get absolute value
+  const ratio = parseFloat(lineHeight);
+  if (!isNaN(ratio) && ratio > 0) {
+    const fsLength = Length.parse(fontSize);
+    if (fsLength?.unit === "rem") {
+      const absolute = ratio * fsLength.number;
+      return `${absolute}rem`;
+    }
+    if (fsLength?.unit === "px") {
+      const absolute = ratio * fsLength.number;
+      return `${absolute}px`;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Extracts a string value from a Tailwind theme value
  * Handles both string values and object values (like fontSize in Tailwind v4)
  */
@@ -358,6 +412,35 @@ function extractStringValue(value: unknown): string | null {
   }
 
   return null;
+}
+
+/**
+ * Extracts companion line-height and letter-spacing from a fontSize theme entry.
+ * Tailwind fontSize entries can be:
+ *   - "1rem" (string only, no companions)
+ *   - ["1rem", "1.5"] (array with lineHeight string)
+ *   - ["1rem", { lineHeight: "1.5", letterSpacing: "-0.02em" }]
+ *   - { fontSize: "1rem", lineHeight: "1.5", letterSpacing: "-0.02em" }
+ */
+export function extractFontSizeCompanions(value: unknown): FontSizeCompanions {
+  const result: FontSizeCompanions = {};
+
+  if (Array.isArray(value) && value.length > 1) {
+    const second = value[1];
+    if (typeof second === "string") {
+      result.lineHeight = second;
+    } else if (second && typeof second === "object") {
+      const obj = second as Record<string, unknown>;
+      if (typeof obj.lineHeight === "string") result.lineHeight = obj.lineHeight;
+      if (typeof obj.letterSpacing === "string") result.letterSpacing = obj.letterSpacing;
+    }
+  } else if (value && typeof value === "object" && !Array.isArray(value)) {
+    const obj = value as Record<string, unknown>;
+    if (typeof obj.lineHeight === "string") result.lineHeight = obj.lineHeight;
+    if (typeof obj.letterSpacing === "string") result.letterSpacing = obj.letterSpacing;
+  }
+
+  return result;
 }
 
 /**

@@ -5,11 +5,11 @@ import fs from "fs";
 
 const base = path.resolve(__dirname, "..");
 
-async function buildCSS(candidates: string[]) {
+async function buildCSS(candidates: string[], pluginOptions = "") {
   const pluginPath = path.resolve(base, "src/index.ts");
   const input = `
     @import "tailwindcss";
-    @plugin "${pluginPath}";
+    @plugin "${pluginPath}"${pluginOptions ? ` { ${pluginOptions} }` : ""};
   `;
   const compiler = await compile(input, {
     base,
@@ -50,5 +50,23 @@ describe("Tailwind v4 compile integration", () => {
     const result = await buildCSS(["fl-p-4/8", "fl-p-4/8--md-lg"]);
     expect(result).toContain("0.6479rem + 1.5023vw");
     expect(result).toContain("6.25vw - 2rem");
+  });
+
+  it("fl-text emits only font-size when fontSize theme has no companions", async () => {
+    const result = await buildCSS(["fl-text-base/5xl"]);
+    // Tailwind v4 default fontSize theme uses plain strings without companions,
+    // so only font-size is emitted in the utility rule.
+    expect(result).toContain("font-size: clamp(");
+    // The utility block should also contain line-height since v4 provides companions
+    const utilityBlock = result.match(/\.fl-text-base\\\/5xl\s*\{([^}]+)\}/);
+    expect(utilityBlock).not.toBeNull();
+  });
+
+  it("fl-text-4xl/7xl generates fluid line-height from Tailwind v4 companions", async () => {
+    const result = await buildCSS(["fl-text-4xl/7xl"]);
+    const utilityBlock = result.match(/\.fl-text-4xl\\\/7xl\s*\{([^}]+)\}/);
+    expect(utilityBlock).not.toBeNull();
+    expect(utilityBlock![1]).toContain("font-size: clamp(");
+    expect(utilityBlock![1]).toContain("line-height: clamp(");
   });
 });

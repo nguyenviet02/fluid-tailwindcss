@@ -12,6 +12,8 @@ import {
   resolveThemeValue,
   checkAccessibility,
   validateFluidUnits,
+  extractFontSizeCompanions,
+  resolveLineHeightCompanion,
 } from "./clamp";
 import { fluidUtilities, getThemePath, getDefaultScale } from "./utilities";
 import { parseArbitraryValue } from "./validation";
@@ -51,6 +53,8 @@ export {
   validateFluidUnits,
   createNegatedClamp,
   createContainerClamp,
+  extractFontSizeCompanions,
+  resolveLineHeightCompanion,
 } from "./clamp";
 
 // Export utility definitions
@@ -452,6 +456,40 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
               resolvedOptions,
               { negate, ...bpOverrides },
             );
+
+            // For fl-text, also emit fluid line-height and letter-spacing
+            // when both min and max fontSize entries have companion values
+            if (utilityName === "fl-text") {
+              const css = createFluidDeclaration(utilityDef.property, clampValue);
+              const minCompanions = extractFontSizeCompanions(themeValues[parsed.min]);
+              const maxCompanions = extractFontSizeCompanions(themeValues[parsed.max]);
+
+              if (minCompanions.lineHeight && maxCompanions.lineHeight) {
+                const minLH = resolveLineHeightCompanion(minCompanions.lineHeight, minResolved);
+                const maxLH = resolveLineHeightCompanion(maxCompanions.lineHeight, maxResolved);
+                if (minLH && maxLH) {
+                  const { result: lhClamp } = calculateClampAdvanced(
+                    minLH,
+                    maxLH,
+                    resolvedOptions,
+                    { negate, ...bpOverrides },
+                  );
+                  if (lhClamp) css["line-height"] = lhClamp;
+                }
+              }
+
+              if (minCompanions.letterSpacing && maxCompanions.letterSpacing) {
+                const { result: lsClamp } = calculateClampAdvanced(
+                  minCompanions.letterSpacing,
+                  maxCompanions.letterSpacing,
+                  resolvedOptions,
+                  { negate, ...bpOverrides },
+                );
+                if (lsClamp) css["letter-spacing"] = lsClamp;
+              }
+
+              return css;
+            }
 
             // Create the CSS declaration
             return createFluidDeclaration(utilityDef.property, clampValue);
