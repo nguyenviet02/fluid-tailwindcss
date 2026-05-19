@@ -450,11 +450,12 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             }
 
             // Calculate the clamp value using advanced function for debug support
+            const shouldPreserveUnit = utilityName === "fl-tracking";
             const { result: clampValue } = calculateClampAdvanced(
               minResolved,
               maxResolved,
               resolvedOptions,
-              { negate, ...bpOverrides },
+              { negate, preserveUnit: shouldPreserveUnit, ...bpOverrides },
             );
 
             // For fl-text, also emit fluid line-height and letter-spacing
@@ -479,13 +480,19 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
               }
 
               if (minCompanions.letterSpacing && maxCompanions.letterSpacing) {
-                const { result: lsClamp } = calculateClampAdvanced(
+                const { result: lsClamp, validation: lsValidation } = calculateClampAdvanced(
                   minCompanions.letterSpacing,
                   maxCompanions.letterSpacing,
                   resolvedOptions,
-                  { negate, ...bpOverrides },
+                  { negate, preserveUnit: true, ...bpOverrides },
                 );
-                if (lsClamp) css["letter-spacing"] = lsClamp;
+                if (lsClamp) {
+                  css["letter-spacing"] = lsClamp;
+                } else if (resolvedOptions.debug && lsValidation.error) {
+                  console.warn(
+                    `[fluid-tailwindcss] fl-text-${parsed.min}/${parsed.max} letter-spacing skipped: ${lsValidation.error.message}`,
+                  );
+                }
               }
 
               return css;

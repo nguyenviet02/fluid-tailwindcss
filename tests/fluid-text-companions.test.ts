@@ -120,9 +120,20 @@ describe("fl-text companion clamp generation", () => {
   it("generates fluid letter-spacing clamp from companion values", () => {
     const minLS = "-0.01em";
     const maxLS = "-0.03em";
-    const { result } = calculateClampAdvanced(minLS, maxLS, defaultOptions);
+    const { result } = calculateClampAdvanced(minLS, maxLS, defaultOptions, {
+      preserveUnit: true,
+    });
     expect(result).toMatch(/^clamp\(/);
-    expect(result).toContain("em");
+    // Must output em, not rem — em is relative to element font-size
+    expect(result).toMatch(/em[,)]/);
+    expect(result).not.toContain("rem");
+  });
+
+  it("outputs static em value when both letter-spacing values are equal", () => {
+    const { result } = calculateClampAdvanced("-0.03em", "-0.03em", defaultOptions, {
+      preserveUnit: true,
+    });
+    expect(result).toBe("-0.03em");
   });
 
   it("handles unitless line-height values gracefully", () => {
@@ -161,16 +172,18 @@ describe("fl-text companion clamp generation", () => {
     expect(lhClamp).toContain("clamp(");
     expect(lhClamp).toContain("rem");
 
-    // Letter-spacing clamp
+    // Letter-spacing clamp (must preserve em unit)
     expect(minCompanions.letterSpacing).toBe("0em");
     expect(maxCompanions.letterSpacing).toBe("-0.03em");
     const { result: lsClamp } = calculateClampAdvanced(
       minCompanions.letterSpacing!,
       maxCompanions.letterSpacing!,
       defaultOptions,
+      { preserveUnit: true },
     );
     expect(lsClamp).toContain("clamp(");
-    expect(lsClamp).toContain("em");
+    expect(lsClamp).toMatch(/em[,)]/);
+    expect(lsClamp).not.toContain("rem");
   });
 
   it("does not emit companions when only one side has them", () => {

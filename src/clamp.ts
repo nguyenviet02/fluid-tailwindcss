@@ -492,6 +492,7 @@ export function calculateClampAdvanced(
   overrides?: PerUtilityBreakpoints & {
     negate?: boolean;
     useContainerQuery?: boolean;
+    preserveUnit?: boolean;
   },
 ): { result: string; validation: ValidationResult } {
   const { rootFontSize, useRem, debug } = options;
@@ -500,6 +501,7 @@ export function calculateClampAdvanced(
   const useContainerQuery =
     overrides?.useContainerQuery ?? options.useContainerQuery;
   const negate = overrides?.negate ?? false;
+  const preserveUnit = overrides?.preserveUnit ?? false;
 
   // Parse values using Length class with spacing fallback
   let start =
@@ -551,30 +553,43 @@ export function calculateClampAdvanced(
     }
   }
 
-  // Convert to rem for calculations
-  const startRem = start.toRem(rootFontSize);
-  const endRem = end.toRem(rootFontSize);
+  // When preserveUnit is true, keep the original unit (e.g., em for letter-spacing)
+  // instead of converting to rem. This is important because em is relative to the
+  // element's font-size, not the root font-size.
 
-  if (!startRem || !endRem) {
-    return {
-      result: "",
-      validation: {
-        valid: false,
-        error: FluidError.fromCode(
-          "unsupported-unit",
-          start.unit || end.unit || "unknown",
-        ),
-      },
-    };
+  let minNum: number;
+  let maxNum: number;
+
+  if (preserveUnit && start.unit === "em") {
+    // For em units, use the raw numbers directly
+    minNum = start.number;
+    maxNum = end.number;
+  } else {
+    // Convert to rem for calculations
+    const startRem = start.toRem(rootFontSize);
+    const endRem = end.toRem(rootFontSize);
+
+    if (!startRem || !endRem) {
+      return {
+        result: "",
+        validation: {
+          valid: false,
+          error: FluidError.fromCode(
+            "unsupported-unit",
+            start.unit || end.unit || "unknown",
+          ),
+        },
+      };
+    }
+
+    minNum = startRem.number;
+    maxNum = endRem.number;
   }
-
-  let minRem = startRem.number;
-  let maxRem = endRem.number;
 
   // Apply negation if requested
   if (negate) {
-    minRem *= -1;
-    maxRem *= -1;
+    minNum *= -1;
+    maxNum *= -1;
   }
 
   // Convert viewports to rem for calculation
@@ -582,10 +597,15 @@ export function calculateClampAdvanced(
   const maxViewportRem = maxViewport / rootFontSize;
 
   // Handle edge case where values are equal
-  if (minRem === maxRem) {
-    const value = useRem
-      ? `${toPrecision(minRem, 4)}rem`
-      : `${toPrecision(minRem * rootFontSize, 4)}px`;
+  if (minNum === maxNum) {
+    let value: string;
+    if (preserveUnit && start.unit === "em") {
+      value = `${toPrecision(minNum, 4)}em`;
+    } else {
+      value = useRem
+        ? `${toPrecision(minNum, 4)}rem`
+        : `${toPrecision(minNum * rootFontSize, 4)}px`;
+    }
     return {
       result: value,
       validation: {
@@ -608,22 +628,27 @@ export function calculateClampAdvanced(
 
   // Calculate precision from max of all input precisions (minimum 2)
   const precision = Math.max(
-    getPrecision(minRem),
-    getPrecision(maxRem),
+    getPrecision(minNum),
+    getPrecision(maxNum),
     getPrecision(minViewportRem),
     getPrecision(maxViewportRem),
     2,
   );
 
   // Calculate slope and intercept
-  const slope = (maxRem - minRem) / (maxViewportRem - minViewportRem);
-  const intercept = minRem - slope * minViewportRem;
+  const slope = (maxNum - minNum) / (maxViewportRem - minViewportRem);
+  const intercept = minNum - slope * minViewportRem;
 
   // Handle edge case where slope is effectively 0
   if (Math.abs(slope) < 0.0001) {
-    const value = useRem
-      ? `${toPrecision(minRem, precision)}rem`
-      : `${toPrecision(minRem * rootFontSize, precision)}px`;
+    let value: string;
+    if (preserveUnit && start.unit === "em") {
+      value = `${toPrecision(minNum, precision)}em`;
+    } else {
+      value = useRem
+        ? `${toPrecision(minNum, precision)}rem`
+        : `${toPrecision(minNum * rootFontSize, precision)}px`;
+    }
     return {
       result: value,
       validation: { valid: true },
@@ -635,21 +660,28 @@ export function calculateClampAdvanced(
   const viewportUnit = useContainerQuery ? "cqw" : "vw";
 
   // Ensure min < max for valid CSS clamp
-  const clampMin = Math.min(minRem, maxRem);
-  const clampMax = Math.max(minRem, maxRem);
+  const clampMin = Math.min(minNum, maxNum);
+  const clampMax = Math.max(minNum, maxNum);
 
-  // Format values
-  const minFormatted = useRem
-    ? `${toPrecision(clampMin, precision)}rem`
-    : `${toPrecision(clampMin * rootFontSize, precision)}px`;
-  const maxFormatted = useRem
-    ? `${toPrecision(clampMax, precision)}rem`
-    : `${toPrecision(clampMax * rootFontSize, precision)}px`;
+  // Format values based on output unit
+  let minFormatted: string;
+  let maxFormatted: string;
+  let interceptFormatted: string;
 
-  // Build the preferred value expression
-  const interceptFormatted = useRem
-    ? `${toPrecision(Math.abs(intercept), precision)}rem`
-    : `${toPrecision(Math.abs(intercept * rootFontSize), precision)}px`;
+  if (preserveUnit && start.unit === "em") {
+    minFormatted = `${toPrecision(clampMin, precision)}em`;
+    maxFormatted = `${toPrecision(clampMax, precision)}em`;
+    interceptFormatted = `${toPrecision(Math.abs(intercept), precision)}em`;
+  } else if (useRem) {
+    minFormatted = `${toPrecision(clampMin, precision)}rem`;
+    maxFormatted = `${toPrecision(clampMax, precision)}rem`;
+    interceptFormatted = `${toPrecision(Math.abs(intercept), precision)}rem`;
+  } else {
+    minFormatted = `${toPrecision(clampMin * rootFontSize, precision)}px`;
+    maxFormatted = `${toPrecision(clampMax * rootFontSize, precision)}px`;
+    interceptFormatted = `${toPrecision(Math.abs(intercept * rootFontSize), precision)}px`;
+  }
+
   const slopeFormatted = toPrecision(slopeVw, precision);
 
   let preferred: string;
