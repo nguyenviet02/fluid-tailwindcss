@@ -142,6 +142,18 @@ function normalizeOptions(options: FluidOptions): FluidOptions {
   ) {
     normalized.validateUnits = options.validateunits;
   }
+  if (
+    options.minlayoutviewport !== undefined &&
+    options.minLayoutViewport === undefined
+  ) {
+    normalized.minLayoutViewport = options.minlayoutviewport;
+  }
+  if (
+    options.maxlayoutviewport !== undefined &&
+    options.maxLayoutViewport === undefined
+  ) {
+    normalized.maxLayoutViewport = options.maxlayoutviewport;
+  }
 
   return normalized;
 }

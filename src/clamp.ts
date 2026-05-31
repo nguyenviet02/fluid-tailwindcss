@@ -596,6 +596,29 @@ export function calculateClampAdvanced(
   const minViewportRem = minViewport / rootFontSize;
   const maxViewportRem = maxViewport / rootFontSize;
 
+  // Layout viewport extrapolation: when layout viewports are set and no
+  // per-utility breakpoint override is active, the user-specified min/max values
+  // correspond to the layout viewport boundaries. We extrapolate the linear
+  // slope to find what values land at the global viewport boundaries.
+  const hasBreakpointOverride = overrides?.minViewport != null || overrides?.maxViewport != null;
+  const minLayoutVp = options.minLayoutViewport;
+  const maxLayoutVp = options.maxLayoutViewport;
+
+  if (
+    !hasBreakpointOverride &&
+    minLayoutVp != null &&
+    maxLayoutVp != null &&
+    minLayoutVp < maxLayoutVp
+  ) {
+    const minLayoutRem = minLayoutVp / rootFontSize;
+    const maxLayoutRem = maxLayoutVp / rootFontSize;
+    const layoutSlope = (maxNum - minNum) / (maxLayoutRem - minLayoutRem);
+
+    // Extrapolate to global viewport boundaries
+    minNum = minNum - layoutSlope * (minLayoutRem - minViewportRem);
+    maxNum = maxNum + layoutSlope * (maxViewportRem - maxLayoutRem);
+  }
+
   // Handle edge case where values are equal
   if (minNum === maxNum) {
     let value: string;

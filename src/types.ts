@@ -80,6 +80,24 @@ export interface FluidOptions {
   validateUnits?: boolean;
   /** @deprecated Use validateUnits instead. Lowercase variant for Prettier compatibility. */
   validateunits?: boolean;
+
+  /**
+   * Minimum layout viewport in pixels where the min fluid value is reached.
+   * When set, fluid scaling extrapolates beyond this point down to minViewport.
+   * Must satisfy: minViewport <= minLayoutViewport < maxLayoutViewport <= maxViewport
+   */
+  minLayoutViewport?: number;
+  /** @deprecated Use minLayoutViewport instead. Lowercase variant for Prettier compatibility. */
+  minlayoutviewport?: number;
+
+  /**
+   * Maximum layout viewport in pixels where the max fluid value is reached.
+   * When set, fluid scaling extrapolates beyond this point up to maxViewport.
+   * Must satisfy: minViewport <= minLayoutViewport < maxLayoutViewport <= maxViewport
+   */
+  maxLayoutViewport?: number;
+  /** @deprecated Use maxLayoutViewport instead. Lowercase variant for Prettier compatibility. */
+  maxlayoutviewport?: number;
 }
 
 /**
@@ -96,6 +114,8 @@ export interface ResolvedFluidOptions {
   useContainerQuery: boolean;
   debug: boolean;
   validateUnits: boolean;
+  minLayoutViewport?: number;
+  maxLayoutViewport?: number;
 }
 
 /**
