@@ -52,7 +52,7 @@
   "bugs": {
     "url": "https://github.com/nguyenviet02/fluid-tailwindcss/issues"
   },
-  "homepage": "https://fluid-tailwindcss.vercel.app",
+  "homepage": "https://fluid-tailwindcss.vietnx.io.vn",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
