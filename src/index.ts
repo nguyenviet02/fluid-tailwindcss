@@ -6,19 +6,12 @@ import type {
   CssInJs,
   PluginAPI,
 } from "./types";
-import {
-  calculateClampAdvanced,
-  parseFluidString,
-  resolveThemeValue,
-  checkAccessibility,
-  validateFluidUnits,
-  extractFontSizeCompanions,
-  resolveLineHeightCompanion,
-} from "./clamp";
+import { parseFluidString, resolveThemeValue, checkAccessibility, validateFluidUnits, extractFontSizeCompanions, resolveLineHeightCompanion, calculateClampAdvanced } from "./clamp";
 import { fluidUtilities, getThemePath, getDefaultScale } from "./utilities";
 import { parseArbitraryValue } from "./validation";
 import { Length } from "./length";
 import { parseBreakpointRange, resolveScreens } from "./breakpoints";
+import { generateFluidVariables, fluidVariableThemeExtensions } from "./variables";
 
 // Re-export types for consumers
 export type {
@@ -33,6 +26,9 @@ export type {
   ValidationResult,
   FluidValuePair,
   PerUtilityBreakpoints,
+  FluidVariablePrefix,
+  FluidVariablePrefixMapping,
+  FluidVariableEntry,
 } from "./types";
 
 export type { BreakpointRange } from "./breakpoints";
@@ -85,6 +81,9 @@ export {
   SUPPORTED_UNITS,
 } from "./validation";
 
+// Export fluid variable utilities
+export { generateFluidVariables, fluidVariableThemeExtensions } from "./variables";
+
 /**
  * Default plugin options
  */
@@ -99,6 +98,7 @@ const defaultOptions: ResolvedFluidOptions = {
   useContainerQuery: false,
   debug: false,
   validateUnits: true,
+  variables: {},
 };
 
 /**
@@ -107,6 +107,25 @@ const defaultOptions: ResolvedFluidOptions = {
  */
 function normalizeOptions(options: FluidOptions): FluidOptions {
   const normalized: FluidOptions = { ...options };
+
+  // Sweep CSS @plugin custom-property declarations (`--name: value`) into a unified
+  // `variables` map. Tailwind v4 passes these as flat option keys with string values.
+  const variables: Record<string, string> = {};
+  for (const key of Object.keys(normalized)) {
+    if (key.startsWith("--") && typeof normalized[key as keyof FluidOptions] === "string") {
+      variables[key] = normalized[key as keyof FluidOptions] as string;
+      delete normalized[key as keyof FluidOptions];
+    }
+  }
+
+  // Merge JS-form variables on top (JS wins on conflict). Normalize keys to `--`.
+  if (normalized.variables) {
+    for (const [key, value] of Object.entries(normalized.variables)) {
+      const normalizedKey = key.startsWith("--") ? key : `--${key}`;
+      variables[normalizedKey] = value;
+    }
+  }
+  normalized.variables = variables;
 
   // Map lowercase variants to camelCase
   if (options.minviewport !== undefined && options.minViewport === undefined) {
@@ -322,8 +341,27 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
   (options = {}) => {
     const resolvedOptions = resolveOptions(options);
 
-    return ({ matchUtilities, theme }) => {
+    return ({ matchUtilities, theme, addBase }) => {
       const screens = resolveScreens(theme);
+
+      // Emit `:root` fluid variables when provided. Guard `addBase` so test
+      // stubs and older Tailwind versions without it don't crash.
+      if (resolvedOptions.variables && Object.keys(resolvedOptions.variables).length > 0) {
+        if (addBase) {
+          addBase(
+            generateFluidVariables(
+              resolvedOptions.variables,
+              resolvedOptions,
+              screens,
+              {},
+            ),
+          );
+        } else if (resolvedOptions.debug) {
+          console.warn(
+            `[fluid-tailwindcss] Variables provided but addBase is not available; :root clamps will not be emitted.`,
+          );
+        }
+      }
 
       // Register each fluid utility
       for (const [utilityName, utilityDef] of Object.entries(fluidUtilities)) {
@@ -541,9 +579,10 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
     };
   },
   // Plugin configuration (for @plugin options)
-  () => ({
-    // No additional Tailwind config needed
-  }),
+  (options = {}) => {
+    const v = normalizeOptions(options).variables ?? {};
+    return Object.keys(v).length > 0 ? fluidVariableThemeExtensions(v) : {};
+  },
 ) as unknown as FluidPlugin;
 
 /**

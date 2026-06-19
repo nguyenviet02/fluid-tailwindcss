@@ -252,6 +252,89 @@ module.exports = {
 | `fl-scroll-m`, `fl-scroll-mx`, `fl-scroll-my` | Scroll margin  |
 | `fl-scroll-p`, `fl-scroll-px`, `fl-scroll-py` | Scroll padding |
 
+## Fluid CSS Variables
+
+In addition to `fl-*` utility classes, `fluid-tailwindcss` allows you to declare fluid values as CSS custom properties (variables) that automatically evaluate to responsive `clamp()` expressions in `:root`.
+
+Furthermore, for variables matching recognized prefixes, the plugin automatically registers theme extensions so that standard Tailwind utilities (e.g. `text-*`, `p-*`, `rounded-*`) can be used directly with your fluid variables.
+
+### 1. Declaring Fluid Variables
+
+You can declare fluid variables either in CSS (via Tailwind v4 `@plugin`) or in your JavaScript configuration.
+
+#### CSS configuration (TailwindCSS v4)
+Any custom property declaration starting with `--` inside the `@plugin` block is automatically intercepted and resolved:
+
+```css
+@plugin "fluid-tailwindcss" {
+  --text-h1: 36px/60px;
+  --spacing-gutter: 16px/32px;
+  --brand-color-padding: 2/6; /* Bare numbers resolve against spacing scale (0.5rem to 1.5rem) */
+}
+```
+
+#### JavaScript configuration (TailwindCSS v3 & v4)
+Pass a `variables` map in the plugin options:
+
+```javascript
+// tailwind.config.js
+module.exports = {
+  plugins: [
+    require("fluid-tailwindcss")({
+      variables: {
+        "text-h1": "36px/60px",
+        "spacing-gutter": "16px/32px",
+        "brand-color-padding": "2/6"
+      }
+    }),
+  ],
+};
+```
+
+### 2. Output and Namespacing
+
+To prevent collisions with Tailwind v4's own `@theme` variables (which are also emitted to `:root`), fluid variables are generated under the `--fluid-` namespace:
+
+```css
+:root {
+  --fluid-text-h1: clamp(2.25rem, 1.7782rem + 2.0094vw, 3.75rem);
+  --fluid-spacing-gutter: clamp(1rem, 0.7647rem + 1.0047vw, 2rem);
+  --fluid-brand-color-padding: clamp(0.5rem, 0.2647rem + 1.0047vw, 1.5rem);
+}
+```
+
+### 3. Automatic Utility Generation
+
+For variables starting with a recognized prefix, the plugin extends the matching Tailwind theme scale. This automatically exposes standard Tailwind utility classes that map directly to the fluid variables:
+
+| Prefix | Theme Scale | Generated Utility | Value Reference |
+| --- | --- | --- | --- |
+| `text-` | `fontSize` | `text-<name>` | `var(--fluid-text-<name>)` |
+| `spacing-` | `spacing` | `p-<name>`, `m-<name>`, etc. | `var(--fluid-spacing-<name>)` |
+| `leading-` | `lineHeight` | `leading-<name>` | `var(--fluid-leading-<name>)` |
+| `tracking-` | `letterSpacing` | `tracking-<name>` | `var(--fluid-tracking-<name>)` |
+| `radius-` | `borderRadius` | `rounded-<name>` | `var(--fluid-radius-<name>)` |
+
+For example, declaring `--text-h1: 36px/60px` automatically registers `fontSize.h1 = "var(--fluid-text-h1)"`. In your HTML, you can then write:
+
+```html
+<!-- Uses the custom fluid size with normal Tailwind classes -->
+<h1 class="text-h1">Fluid Title</h1>
+```
+
+Tailwind compiles this to:
+```css
+.text-h1 {
+  font-size: var(--text-h1); /* Tailwind resolves this via --text-h1: var(--fluid-text-h1) */
+}
+```
+
+If a declared variable does not match one of these prefixes (e.g. `--brand-gutter: 16px/32px`), it is still emitted to `:root` as `--fluid-brand-gutter`, but no automatic theme extensions or utilities are generated. You can consume it manually via `var(--fluid-brand-gutter)`.
+
+### Limitations
+
+- **Named Theme Keys**: Referencing named theme keys inside a fluid variable spec (e.g. `--text-myfont: base/2xl`) is **not supported** because variables lack scale/context lookup during build-time evaluation. Only absolute lengths with units (e.g. `16px/24px`, `1rem/1.5rem`) and bare numbers (which fallback to the spacing scale) are supported.
+
 ## Tailwind Merge Integration
 
 The package includes first-class support for `tailwind-merge`. This ensures fluid utilities properly conflict with their non-fluid counterparts.

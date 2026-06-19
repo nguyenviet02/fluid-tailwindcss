@@ -20,6 +20,7 @@ Before code changes, read:
 
 - `src/index.ts`: Tailwind plugin registration and public exports.
 - `src/clamp.ts`: fluid math and clamp generation.
+- `src/variables.ts`: resolution, namespacing, and config/theme extensions for fluid variables.
 - `src/utilities.ts`: supported `fl-*` utility definitions.
 - `src/tailwind-merge/index.ts`: merge groups and conflict behavior.
 - `src/types.ts`: public and internal TypeScript types.
@@ -42,6 +43,7 @@ Before code changes, read:
 - Bare numeric spacing values must keep working, including decimals such as `fl-mt-4.5/10`.
 - Lowercase option aliases such as `minviewport` and `checkaccessibility` are intentional for CSS `@plugin` compatibility.
 - Unit validation should reject incompatible arbitrary values while allowing zero to adopt the other value's unit.
+- Fluid CSS Variables must be namespaced under `--fluid-<name>` in `:root` and registered as theme key extensions pointing to `var(--fluid-<name>)` to avoid colliding with Tailwind's generated custom properties.
 
 ## Synchronization Checklist
 

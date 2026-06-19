@@ -5,6 +5,7 @@
 
 - `src/index.ts`: Main plugin entry point, option normalization, Tailwind `matchUtilities` registration, public exports.
 - `src/clamp.ts`: CSS `clamp()` calculation, fluid parsing, validation integration, accessibility checks.
+- `src/variables.ts`: Fluid CSS variable resolution, namespacing, and config/theme extensions.
 - `src/length.ts`: CSS length parsing and rem/px conversion.
 - `src/utilities.ts`: Source of truth for supported `fl-*` utility names and CSS property mappings.
 - `src/validation.ts`: Unit matching, breakpoint/value validation, arbitrary value helpers.
@@ -23,6 +24,7 @@
 - Clamp math converts supported units to rem internally, then emits rem or px depending on options.
 - `generateFluidValues()` intentionally registers O(n) values, not O(n²) min/max pairs.
 - `src/utilities.ts` and `src/tailwind-merge/index.ts` must stay synchronized.
+- Fluid CSS Variables declared in @plugin `--*` declarations or JS option maps emit namespaced `--fluid-<name>` clamps into `:root` and auto-register matching Tailwind utility theme extensions.
 
 ## Main Commands
 

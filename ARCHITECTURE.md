@@ -17,6 +17,7 @@ The repository also contains a Vite/React homepage under `homepage/` that consum
 | `src/validation.ts` | Unit/value/breakpoint validation helpers and arbitrary value parsing. |
 | `src/errors.ts` | Typed error codes, `FluidError`, and result helpers. |
 | `src/types.ts` | Public and internal TypeScript types. |
+| `src/variables.ts` | Resolution, namespacing, and Tailwind theme extension generation for fluid CSS variables. |
 | `src/tailwind-merge/index.ts` | `tailwind-merge` extension, validators, custom merge factories. |
 | `tests/` | Vitest coverage for clamp math, plugin registration, validation, merge behavior, and performance characteristics. |
 | `homepage/` | Vite React demo/documentation site using Tailwind CSS v4 and this workspace package. |
@@ -62,6 +63,26 @@ Important behaviors:
 - Tailwind v4 slash syntax is reconstructed from `value` and `extra.modifier`, so `fl-p-4/8` becomes the effective value `4/8`.
 - Spacing utilities accept bare numeric values through `__BARE_VALUE__`, enabling classes like `fl-mt-4.5/10`.
 - Negative utilities use `neg-fl-*` because Tailwind v4 does not allow plugin utility names starting with `-`.
+
+### Fluid CSS Variables
+
+Fluid CSS Variables allow users to define custom properties inside a `@plugin "fluid-tailwindcss"` configuration (or via the JS config `variables` option) and have them compile directly to CSS `clamp()` custom properties in `:root`.
+
+#### Namespacing Invariant
+To prevent collision with Tailwind CSS v4's own `@theme` output (which generates variables like `--text-h1` in `:root`), the plugin uses a strictNamespacing rule:
+1. Declarations are registered in `:root` under the internal namespace `--fluid-<name>` (e.g. `--fluid-text-h1`).
+2. Standard utility scale config functions are injected via `fluidVariableThemeExtensions()` to register theme key extensions pointing to the namespaced variables (e.g., `fontSize.h1` maps to `var(--fluid-text-h1)`).
+3. This creates a non-cyclic dependency chain where Tailwind generates `--text-h1: var(--fluid-text-h1)` and utility usage `.text-h1 { font-size: var(--text-h1); }` resolves correctly.
+
+#### Prefix Mapping
+Variables whose names start with a recognized prefix automatically extend the corresponding Tailwind theme scale:
+- `text-` maps to `fontSize` scale
+- `spacing-` maps to `spacing` scale
+- `leading-` maps to `lineHeight` scale
+- `tracking-` maps to `letterSpacing` scale
+- `radius-` maps to `borderRadius` scale
+
+Other variables are still registered as `--fluid-<name>` in `:root` but do not auto-extend any Tailwind scales.
 
 ### Clamp Calculation
 

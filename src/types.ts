@@ -98,6 +98,17 @@ export interface FluidOptions {
   maxLayoutViewport?: number;
   /** @deprecated Use maxLayoutViewport instead. Lowercase variant for Prettier compatibility. */
   maxlayoutviewport?: number;
+
+  /**
+   * Fluid CSS variables to emit as computed `clamp()` values in `:root`.
+   *
+   * Map of variable name (without leading `--`) to a fluid spec such as
+   * `"64px/80px"` or `"4/8--md-lg"`. In CSS `@plugin` blocks, custom-property
+   * declarations (`--text-h1: 64px/80px;`) are swept into this map during
+   * option normalization. Recognized name prefixes (`text`, `spacing`,
+   * `leading`, `tracking`, `radius`) also generate matching Tailwind utilities.
+   */
+  variables?: Record<string, string>;
 }
 
 /**
@@ -116,6 +127,48 @@ export interface ResolvedFluidOptions {
   validateUnits: boolean;
   minLayoutViewport?: number;
   maxLayoutViewport?: number;
+  variables: Record<string, string>;
+}
+
+/**
+ * Recognized fluid variable name prefixes that map to Tailwind theme scales.
+ * A declared variable whose name starts with one of these (e.g. `text-head-1`)
+ * generates the corresponding Tailwind utility (`text-head-1`, `p-gutter`, …).
+ */
+export type FluidVariablePrefix =
+  | "text"
+  | "spacing"
+  | "leading"
+  | "tracking"
+  | "radius";
+
+/**
+ * Maps a recognized variable-name prefix to the Tailwind theme key it extends.
+ */
+export interface FluidVariablePrefixMapping {
+  prefix: FluidVariablePrefix;
+  themeKey:
+    | "fontSize"
+    | "spacing"
+    | "lineHeight"
+    | "letterSpacing"
+    | "borderRadius";
+}
+
+/**
+ * A resolved fluid variable entry.
+ */
+export interface FluidVariableEntry {
+  /** User-facing name without leading `--`, e.g. `text-head-1`. */
+  name: string;
+  /** Raw spec, e.g. `64px/80px` or `4/8--md-lg`. */
+  spec: string;
+  /** Internal clamp variable with leading `--`, e.g. `--fluid-text-head-1`. */
+  clampVar: string;
+  /** Computed `clamp()` string, or `""` if the spec could not be resolved. */
+  clamp: string;
+  /** Matched recognized prefix, or `undefined` for non-matching names. */
+  prefix?: FluidVariablePrefix;
 }
 
 /**
@@ -204,6 +257,10 @@ export interface PluginAPI {
   ) => void;
   theme: (path: string, defaultValue?: unknown) => unknown;
   config: (path: string, defaultValue?: unknown) => unknown;
+  /** Emits base-layer CSS (used to publish `:root` fluid variables). Optional so test stubs type-check. */
+  addBase?: (base: CssInJs) => void;
+  /** Tailwind prefix helper. Optional so test stubs type-check. */
+  prefix?: (className: string) => string;
 }
 
 /**

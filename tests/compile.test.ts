@@ -69,4 +69,24 @@ describe("Tailwind v4 compile integration", () => {
     expect(utilityBlock![1]).toContain("font-size: clamp(");
     expect(utilityBlock![1]).toContain("line-height: clamp(");
   });
+
+  it("emits :root fluid variable from @plugin --* declaration", async () => {
+    const result = await buildCSS([], "--text-h1: 36px/60px;");
+    expect(result).toContain(":root");
+    expect(result).toContain("--fluid-text-h1: clamp(");
+  });
+
+  it("generates auto text-* utility linked to the fluid variable", async () => {
+    const result = await buildCSS(["text-h1"], "--text-h1: 36px/60px;");
+    expect(result).toContain(".text-h1");
+    expect(result).toContain("font-size: var(--fluid-text-h1)");
+    expect(result).toContain("--fluid-text-h1: clamp(");
+  });
+
+  it("emits non-matching variable without auto utility", async () => {
+    const result = await buildCSS([], "--brand-gutter: 16px/32px;");
+    expect(result).toContain("--fluid-brand-gutter: clamp(");
+    expect(result).not.toContain(".brand-gutter");
+    expect(result).not.toContain("--brand-gutter:");
+  });
 });
