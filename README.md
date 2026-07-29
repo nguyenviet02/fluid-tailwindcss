@@ -139,7 +139,8 @@ The plugin uses these defaults:
   maxViewport: 1440,  // Maximum viewport width in pixels
   useRem: true,       // Use rem units (vs px)
   rootFontSize: 16,   // Root font size for rem calculations
-  checkAccessibility: true  // Warn about small font sizes
+  checkAccessibility: true, // Warn about small font sizes
+  mode: 'interpolation'     // Scaling mode ('interpolation' or 'proportional')
 }
 ```
 
@@ -179,6 +180,81 @@ module.exports = {
   ],
 };
 ```
+
+## Scaling Modes
+
+The `mode` option controls how a `min/max` pair becomes a CSS value. Class names and utilities are identical in both modes, so a project can switch modes in one place.
+
+### `interpolation` (default)
+
+Both values are anchored to a viewport width and the value moves linearly between them:
+
+```css
+@plugin "fluid-tailwindcss" {
+  minviewport: 375;
+  maxviewport: 1440;
+}
+```
+
+```html
+<div class="fl-p-4/8"></div>
+```
+
+```css
+padding: clamp(1rem, 0.6479rem + 1.5023vw, 2rem);
+```
+
+The value is `1rem` at 375px, `2rem` at 1440px, and frozen outside that range.
+
+### `proportional`
+
+The max value is expressed as a plain viewport ratio, which keeps the proportions between elements intact at every width — useful for design-driven layouts where relative sizing matters more than exact breakpoint values. The min value becomes a lower bound, so text and spacing never collapse the way a raw `7vw` would:
+
+```css
+@plugin "fluid-tailwindcss" {
+  mode: proportional;
+  minviewport: 375;
+  maxviewport: 1440;
+}
+```
+
+```html
+<div class="fl-p-4/8"></div>
+```
+
+```css
+padding: max(1rem, 2.2222vw);
+```
+
+`2rem` (32px) at a 1440px design width is `32 / 1440 = 2.2222vw`, and the value never drops below `1rem`.
+
+#### Capping growth with layout viewports
+
+Set `maxLayoutViewport` to the width your design values refer to, and `maxViewport` becomes the width where scaling stops:
+
+```css
+@plugin "fluid-tailwindcss" {
+  mode: proportional;
+  minviewport: 375;
+  maxviewport: 1920;
+  minlayoutviewport: 480;
+  maxlayoutviewport: 1440;
+}
+```
+
+```css
+padding: clamp(1rem, 2.2222vw, 2.67rem);
+```
+
+The ratio is still derived from the 1440px design width, and `2.67rem` is what `2.2222vw` resolves to at 1920px.
+
+Notes for `proportional` mode:
+
+- `minViewport` and `minLayoutViewport` are not used; the min value alone defines the lower bound.
+- A per-class breakpoint range (`fl-p-4/8--md-lg`) overrides the design width and drops the cap.
+- `useContainerQuery` swaps `vw` for `cqw` as usual.
+- `em` values (`fl-tracking`) fall back to `interpolation`, since `em` is relative to the element font-size and cannot be expressed as a viewport ratio.
+- Negative utilities (`neg-fl-*`) mirror the behavior with `min()`.
 
 ## Supported Utilities
 

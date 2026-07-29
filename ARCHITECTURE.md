@@ -102,6 +102,7 @@ Default options:
   useContainerQuery: false,
   debug: false,
   validateUnits: true,
+  mode: "interpolation",
 }
 ```
 
@@ -114,6 +115,20 @@ The main advanced path is `calculateClampAdvanced(minValue, maxValue, options, o
 5. Emits either a static value or `clamp(min, preferred, max)`.
 6. Uses `cqw` instead of `vw` when container-query mode is enabled.
 7. Can apply negation and debug comments.
+
+### Scaling Modes
+
+The `mode` option selects how a min/max pair becomes a value. Both modes share the parsing, unit validation, negation, equal-value, and container-query behavior; they diverge only in the emitted expression.
+
+- `interpolation` (default): linear interpolation, optionally shifted by `minLayoutViewport`/`maxLayoutViewport` extrapolation.
+- `proportional`: `buildProportionalValue()` expresses the max value as a viewport ratio reached at the design width (`maxLayoutViewport ?? maxViewport`, or a per-class range override), with the min value as a bound. It emits `max()` for growing values, `min()` for negated ones, a bare ratio when the min value is `0`, and `clamp()` when `maxLayoutViewport` moves the design width inside the viewport range.
+
+Proportional invariants:
+
+- `minViewport` and `minLayoutViewport` are unused; the min value alone bounds the result.
+- Layout-viewport extrapolation is skipped, so the two features never stack.
+- `em` values under `preserveUnit` (i.e. `fl-tracking`) fall back to `interpolation`, because `em` depends on the element font-size.
+- Unknown `mode` strings are normalized to `interpolation` with a warning in `src/index.ts`; the CSS `@plugin` form may arrive quoted or upper-cased.
 
 ### Utility Definitions
 
@@ -162,6 +177,8 @@ Primary validation uses Vitest:
 - `tests/arbitrary-fluid-merge.test.ts`: arbitrary value merge behavior.
 - `tests/advanced-features.test.ts`: advanced options such as negative/container/debug behavior.
 - `tests/performance.test.ts`: performance characteristics.
+- `tests/layout-viewport.test.ts`: layout viewport extrapolation.
+- `tests/proportional-mode.test.ts`: proportional scaling mode and `mode` option normalization.
 
 Use `npm run test:run` for CI-style tests and `npm test` for watch mode.
 

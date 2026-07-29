@@ -17,6 +17,7 @@ import { generateFluidVariables, fluidVariableThemeExtensions } from "./variable
 export type {
   FluidOptions,
   FluidPlugin,
+  FluidMode,
   ResolvedFluidOptions,
   FluidValue,
   UtilityDefinition,
@@ -98,6 +99,7 @@ const defaultOptions: ResolvedFluidOptions = {
   useContainerQuery: false,
   debug: false,
   validateUnits: true,
+  mode: "interpolation",
   variables: {},
 };
 
@@ -172,6 +174,24 @@ function normalizeOptions(options: FluidOptions): FluidOptions {
     options.maxLayoutViewport === undefined
   ) {
     normalized.maxLayoutViewport = options.maxlayoutviewport;
+  }
+
+  // CSS `@plugin` blocks deliver the mode as a raw declaration value, which may
+  // carry quotes or casing that never reaches the JS config form.
+  const rawMode: unknown = normalized.mode;
+  if (typeof rawMode === "string") {
+    const mode = rawMode
+      .trim()
+      .replace(/^["']|["']$/g, "")
+      .toLowerCase();
+    if (mode === "proportional" || mode === "interpolation") {
+      normalized.mode = mode;
+    } else {
+      console.warn(
+        `[fluid-tailwindcss] Unknown mode "${rawMode}". Falling back to "interpolation".`,
+      );
+      normalized.mode = "interpolation";
+    }
   }
 
   return normalized;
