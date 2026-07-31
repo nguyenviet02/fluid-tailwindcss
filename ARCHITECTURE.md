@@ -139,7 +139,7 @@ Proportional invariants:
 Special cases in `src/index.ts`:
 
 - `fl-space-x` / `fl-space-y` emit child selector rules.
-- `fl-translate-x` / `fl-translate-y` also emit a Tailwind transform expression.
+- `fl-translate-x` / `fl-translate-y` set Tailwind's `--tw-translate-*` variable and additionally emit `translate: var(--tw-translate-x, 0) var(--tw-translate-y, 0)`. The `0` fallbacks matter: Tailwind only registers those custom properties via `@property` when one of its own translate utilities is used, and an unresolvable `var()` would invalidate the whole declaration. Do not reintroduce the Tailwind v3 composite `transform`, which referenced variables (`--tw-rotate`, `--tw-scale-x`, …) that no longer exist in v4.
 
 ### Tailwind Merge Integration
 

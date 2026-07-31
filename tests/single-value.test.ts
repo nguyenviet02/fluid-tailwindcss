@@ -185,7 +185,9 @@ describe("single-value classes in proportional mode", () => {
     const result = utilities["fl-translate-x"]("4", single);
 
     expect(result["--tw-translate-x"]).toBe("max(1rem, 1.1111vw)");
-    expect(result["transform"]).toContain("translate(");
+    expect(result["translate"]).toBe(
+      "var(--tw-translate-x, 0) var(--tw-translate-y, 0)",
+    );
   });
 
   it("scales single-value fluid CSS variables", () => {

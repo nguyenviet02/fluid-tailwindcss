@@ -418,7 +418,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
           utilityName === "fl-translate-x" ||
           utilityName === "fl-translate-y"
         ) {
-          // Translate utilities need transform context
+          // Translate utilities also need the translate property
           registerTranslateUtility(
             utilityName,
             utilityDef,
@@ -715,7 +715,19 @@ function registerSpaceUtility(
 }
 
 /**
- * Registers translate utilities with transform context
+ * Value for the `translate` property used by the fluid translate utilities.
+ *
+ * Tailwind v4 applies translation through the standalone `translate` property
+ * instead of the composite `transform` of v3, which lets it compose with
+ * `rotate-*`/`scale-*`. The `0` fallbacks are required because Tailwind only
+ * emits the `@property` registrations for `--tw-translate-*` when one of its own
+ * translate utilities is used; without them the declaration would be invalid at
+ * computed-value time and dropped by the browser.
+ */
+const TRANSLATE_VALUE = "var(--tw-translate-x, 0) var(--tw-translate-y, 0)";
+
+/**
+ * Registers translate utilities that feed Tailwind's translate custom properties
  */
 function registerTranslateUtility(
   utilityName: string,
@@ -767,7 +779,7 @@ function registerTranslateUtility(
         );
         return {
           [utilityDef.property as string]: result,
-          transform: `translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))`,
+          translate: TRANSLATE_VALUE,
         };
       }
 
@@ -793,7 +805,7 @@ function registerTranslateUtility(
 
       return {
         [utilityDef.property as string]: clampValue,
-        transform: `translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))`,
+        translate: TRANSLATE_VALUE,
       };
     };
   };

@@ -353,10 +353,12 @@ Notes for `proportional` mode:
 
 ### Transform
 
-| Utility          | CSS Property       |
-| ---------------- | ------------------ |
-| `fl-translate-x` | `--tw-translate-x` |
-| `fl-translate-y` | `--tw-translate-y` |
+| Utility          | CSS Property                                |
+| ---------------- | ------------------------------------------- |
+| `fl-translate-x` | `--tw-translate-x`, applied via `translate`  |
+| `fl-translate-y` | `--tw-translate-y`, applied via `translate`  |
+
+Both set the same custom properties as Tailwind's own `translate-*` utilities, so they compose with `rotate-*` and `scale-*` and can be combined for both axes.
 
 ### Scroll
 
