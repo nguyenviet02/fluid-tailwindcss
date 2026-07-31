@@ -463,7 +463,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
               if (!arbitraryParsed) return {};
 
               // Validate units match for arbitrary values
-              if (resolvedOptions.validateUnits) {
+              if (resolvedOptions.validateUnits && !arbitraryParsed.single) {
                 const validation = validateFluidUnits(
                   arbitraryParsed.min,
                   arbitraryParsed.max,
@@ -495,7 +495,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             if (!minResolved || !maxResolved) return {};
 
             // Validate units match if validation is enabled
-            if (resolvedOptions.validateUnits) {
+            if (resolvedOptions.validateUnits && !parsed.single) {
               const validation = validateFluidUnits(minResolved, maxResolved);
               if (!validation.valid) {
                 if (resolvedOptions.debug) {
@@ -645,7 +645,7 @@ function registerSpaceUtility(
         const arbitraryParsed = parseFluidString(arbitraryValue);
         if (!arbitraryParsed) return {};
 
-        if (resolvedOptions.validateUnits) {
+        if (resolvedOptions.validateUnits && !arbitraryParsed.single) {
           const validation = validateFluidUnits(
             arbitraryParsed.min,
             arbitraryParsed.max,
@@ -674,7 +674,7 @@ function registerSpaceUtility(
 
       if (!minResolved || !maxResolved) return {};
 
-      if (resolvedOptions.validateUnits) {
+      if (resolvedOptions.validateUnits && !parsed.single) {
         const validation = validateFluidUnits(minResolved, maxResolved);
         if (!validation.valid) return {};
       }
@@ -751,7 +751,7 @@ function registerTranslateUtility(
         const arbitraryParsed = parseFluidString(arbitraryValue);
         if (!arbitraryParsed) return {};
 
-        if (resolvedOptions.validateUnits) {
+        if (resolvedOptions.validateUnits && !arbitraryParsed.single) {
           const validation = validateFluidUnits(
             arbitraryParsed.min,
             arbitraryParsed.max,
@@ -779,7 +779,7 @@ function registerTranslateUtility(
 
       if (!minResolved || !maxResolved) return {};
 
-      if (resolvedOptions.validateUnits) {
+      if (resolvedOptions.validateUnits && !parsed.single) {
         const validation = validateFluidUnits(minResolved, maxResolved);
         if (!validation.valid) return {};
       }

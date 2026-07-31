@@ -76,21 +76,59 @@ describe("round", () => {
 
 describe("parseFluidString", () => {
   it("should parse valid fluid strings", () => {
-    expect(parseFluidString("4/8")).toEqual({ min: "4", max: "8" });
-    expect(parseFluidString("base/2xl")).toEqual({ min: "base", max: "2xl" });
-    expect(parseFluidString("sm/lg")).toEqual({ min: "sm", max: "lg" });
-    expect(parseFluidString("0.5/1.5")).toEqual({ min: "0.5", max: "1.5" });
+    expect(parseFluidString("4/8")).toEqual({
+      min: "4",
+      max: "8",
+      single: false,
+    });
+    expect(parseFluidString("base/2xl")).toEqual({
+      min: "base",
+      max: "2xl",
+      single: false,
+    });
+    expect(parseFluidString("sm/lg")).toEqual({
+      min: "sm",
+      max: "lg",
+      single: false,
+    });
+    expect(parseFluidString("0.5/1.5")).toEqual({
+      min: "0.5",
+      max: "1.5",
+      single: false,
+    });
+  });
+
+  it("should parse a single value as an equal min/max pair", () => {
+    expect(parseFluidString("4")).toEqual({
+      min: "4",
+      max: "4",
+      single: true,
+    });
+    expect(parseFluidString("base")).toEqual({
+      min: "base",
+      max: "base",
+      single: true,
+    });
+    expect(parseFluidString(" 16px ")).toEqual({
+      min: "16px",
+      max: "16px",
+      single: true,
+    });
   });
 
   it("should handle spaces correctly", () => {
-    expect(parseFluidString(" 4 / 8 ")).toEqual({ min: "4", max: "8" });
+    expect(parseFluidString(" 4 / 8 ")).toEqual({
+      min: "4",
+      max: "8",
+      single: false,
+    });
   });
 
   it("should return null for invalid strings", () => {
-    expect(parseFluidString("4")).toBeNull();
     expect(parseFluidString("4/8/12")).toBeNull();
     expect(parseFluidString("")).toBeNull();
     expect(parseFluidString("/")).toBeNull();
+    expect(parseFluidString("4/")).toBeNull();
   });
 });
 

@@ -168,7 +168,7 @@ describe("generateFluidVariables", () => {
 
   it("returns empty object for invalid specs", () => {
     expect(
-      generateFluidVariables({ "--text-h1": "36px" }, baseOptions, screens),
+      generateFluidVariables({ "--text-h1": "nonsense" }, baseOptions, screens),
     ).toEqual({});
     expect(
       generateFluidVariables(
@@ -179,11 +179,17 @@ describe("generateFluidVariables", () => {
     ).toEqual({});
   });
 
+  it("resolves a single-value spec", () => {
+    expect(
+      generateFluidVariables({ "--text-h1": "36px" }, baseOptions, screens),
+    ).toEqual({ ":root": { "--fluid-text-h1": "2.25rem" } });
+  });
+
   it("warns in debug mode for skipped variables", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     generateFluidVariables(
-      { "--text-h1": "36px" },
+      { "--text-h1": "nonsense" },
       { ...baseOptions, debug: true },
       screens,
     );

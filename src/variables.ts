@@ -102,7 +102,7 @@ export function resolveFluidVariable(
     };
   }
 
-  if (options.validateUnits) {
+  if (options.validateUnits && !parsed.single) {
     const validation = validateFluidUnits(minResolved, maxResolved);
     if (!validation.valid) {
       return { name: normalizedName, spec, clampVar, clamp: "" };

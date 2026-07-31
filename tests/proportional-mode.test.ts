@@ -221,7 +221,7 @@ describe("proportional mode", () => {
       expect(result).toContain("em");
     });
 
-    it("returns a static value for equal min and max", () => {
+    it("scales equal min and max instead of going static", () => {
       const { result, validation } = calculateClampAdvanced(
         "1rem",
         "1rem",
@@ -229,7 +229,7 @@ describe("proportional mode", () => {
       );
 
       expect(validation.valid).toBe(true);
-      expect(result).toBe("1rem");
+      expect(result).toBe("max(1rem, 1.1111vw)");
     });
 
     it("still rejects mismatched units", () => {

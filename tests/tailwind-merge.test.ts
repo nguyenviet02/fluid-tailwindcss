@@ -5,6 +5,7 @@ import {
   withFluid,
   createTwMerge,
   isArbitraryFluidValue,
+  isSingleFluidValue,
   isAnyFluidValue,
   isNegativeFluidValue,
   createPrefixedTwMerge,
@@ -174,6 +175,23 @@ describe("isArbitraryFluidValue", () => {
   });
 });
 
+describe("isSingleFluidValue", () => {
+  it("should match single values", () => {
+    expect(isSingleFluidValue("4")).toBe(true);
+    expect(isSingleFluidValue("4.5")).toBe(true);
+    expect(isSingleFluidValue("base")).toBe(true);
+    expect(isSingleFluidValue("[16px]")).toBe(true);
+    expect(isSingleFluidValue("4--md-lg")).toBe(true);
+    expect(isSingleFluidValue("4--[768px-1024px]")).toBe(true);
+  });
+
+  it("should not match pair values", () => {
+    expect(isSingleFluidValue("4/8")).toBe(false);
+    expect(isSingleFluidValue("[1rem/2rem]")).toBe(false);
+    expect(isSingleFluidValue("")).toBe(false);
+  });
+});
+
 describe("isAnyFluidValue", () => {
   it("should match standard fluid values", () => {
     expect(isAnyFluidValue("4/8")).toBe(true);
@@ -185,9 +203,15 @@ describe("isAnyFluidValue", () => {
     expect(isAnyFluidValue("[16px/32px]")).toBe(true);
   });
 
+  it("should match single values", () => {
+    expect(isAnyFluidValue("4")).toBe(true);
+    expect(isAnyFluidValue("[16px]")).toBe(true);
+  });
+
   it("should not match invalid values", () => {
-    expect(isAnyFluidValue("4")).toBe(false);
     expect(isAnyFluidValue("")).toBe(false);
+    expect(isAnyFluidValue("4/8/12")).toBe(false);
+    expect(isAnyFluidValue("/")).toBe(false);
   });
 });
 

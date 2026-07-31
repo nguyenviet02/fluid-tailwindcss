@@ -117,15 +117,25 @@ Where:
 - `{min}` is the minimum value from the Tailwind scale
 - `{max}` is the maximum value from the Tailwind scale
 
+A single value is also supported:
+
+```
+fl-{utility}-{value}
+```
+
+The value is the design value at the maximum (layout) viewport. What that means depends on the scaling mode: in `proportional` mode it scales with the viewport and never falls below the given value, in `interpolation` mode it is simply a static value. See [Scaling Modes](#scaling-modes).
+
 ### Examples
 
-| Class              | Description                         |
-| ------------------ | ----------------------------------- |
-| `fl-p-4/8`         | Fluid padding from 1rem to 2rem     |
-| `fl-text-base/2xl` | Fluid font-size from 1rem to 1.5rem |
-| `fl-m-2/6`         | Fluid margin from 0.5rem to 1.5rem  |
-| `fl-gap-4/8`       | Fluid gap from 1rem to 2rem         |
-| `fl-w-64/96`       | Fluid width from 16rem to 24rem     |
+| Class              | Description                                              |
+| ------------------ | -------------------------------------------------------- |
+| `fl-p-4/8`         | Fluid padding from 1rem to 2rem                          |
+| `fl-text-base/2xl` | Fluid font-size from 1rem to 1.5rem                      |
+| `fl-m-2/6`         | Fluid margin from 0.5rem to 1.5rem                       |
+| `fl-gap-4/8`       | Fluid gap from 1rem to 2rem                              |
+| `fl-w-64/96`       | Fluid width from 16rem to 24rem                          |
+| `fl-p-4`           | Padding of 1rem at the design width (single value)       |
+| `fl-text-base`     | Font-size of 1rem at the design width (single value)     |
 
 ## Configuration
 
@@ -206,6 +216,8 @@ padding: clamp(1rem, 0.6479rem + 1.5023vw, 2rem);
 
 The value is `1rem` at 375px, `2rem` at 1440px, and frozen outside that range.
 
+A single value has nothing to interpolate between, so `fl-p-4` becomes a plain `padding: 1rem`.
+
 ### `proportional`
 
 The max value is expressed as a plain viewport ratio, which keeps the proportions between elements intact at every width — useful for design-driven layouts where relative sizing matters more than exact breakpoint values. The min value becomes a lower bound, so text and spacing never collapse the way a raw `7vw` would:
@@ -247,6 +259,31 @@ padding: clamp(1rem, 2.2222vw, 2.67rem);
 ```
 
 The ratio is still derived from the 1440px design width, and `2.67rem` is what `2.2222vw` resolves to at 1920px.
+
+#### Single values
+
+Because the second value only serves as a bound, a single value is enough to describe a proportional element. `fl-p-4` means "16px at the design width":
+
+```css
+@plugin "fluid-tailwindcss" {
+  mode: proportional;
+  maxlayoutviewport: 1440;
+}
+```
+
+```html
+<div class="fl-p-4"></div>
+```
+
+```css
+padding: max(1rem, 1.1111vw);
+```
+
+The padding is exactly `1rem` at 1440px, never shrinks below `1rem` on narrower viewports, and grows proportionally on wider ones. Adding `maxViewport: 1920` stops that growth at 1920px:
+
+```css
+padding: clamp(1rem, 1.1111vw, 1.33rem);
+```
 
 Notes for `proportional` mode:
 
@@ -346,6 +383,7 @@ Any custom property declaration starting with `--` inside the `@plugin` block is
   --text-h1: 36px/60px;
   --spacing-gutter: 16px/32px;
   --brand-color-padding: 2/6; /* Bare numbers resolve against spacing scale (0.5rem to 1.5rem) */
+  --spacing-section: 96px; /* Single value: scales in proportional mode, static otherwise */
 }
 ```
 

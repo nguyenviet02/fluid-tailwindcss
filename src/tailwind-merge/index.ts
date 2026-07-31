@@ -14,6 +14,13 @@ const fluidValuePattern = /^[\w.-]+\/[\w.-]+(--[\w.-]+|--\[\d+px[-/]\d+px\])?$/;
 const arbitraryFluidValuePattern = /^\[[\w.]+\/[\w.]+\](--[\w.-]+|--\[\d+px[-/]\d+px\])?$/;
 
 /**
+ * Regex patterns for single fluid values, with and without brackets
+ * Matches: 4, base, 4.5, 4--md-lg, [16px], [16px]--md-lg, etc.
+ */
+const singleFluidValuePattern = /^[\w.-]+(--\[\d+px[-/]\d+px\])?$/;
+const arbitrarySingleFluidValuePattern = /^\[[\w.]+\](--[\w.-]+|--\[\d+px[-/]\d+px\])?$/;
+
+/**
  * Creates a validator function for fluid class values
  */
 export function isFluidValue(value: string): boolean {
@@ -28,10 +35,23 @@ export function isArbitraryFluidValue(value: string): boolean {
 }
 
 /**
- * Combined validator for both standard and arbitrary fluid values
+ * Validates single fluid values like `4`, `base` or `[16px]`, as used by
+ * one-value classes such as `fl-p-4`
+ */
+export function isSingleFluidValue(value: string): boolean {
+  return (
+    singleFluidValuePattern.test(value) ||
+    arbitrarySingleFluidValuePattern.test(value)
+  );
+}
+
+/**
+ * Combined validator for standard, arbitrary and single fluid values
  */
 export function isAnyFluidValue(value: string): boolean {
-  return isFluidValue(value) || isArbitraryFluidValue(value);
+  return (
+    isFluidValue(value) || isArbitraryFluidValue(value) || isSingleFluidValue(value)
+  );
 }
 
 /**
@@ -42,9 +62,7 @@ export function isAnyFluidValue(value: string): boolean {
 export function isNegativeFluidValue(value: string): boolean {
   // Handle negative prefix on the value itself (legacy format)
   if (value.startsWith("-")) {
-    return (
-      isFluidValue(value.slice(1)) || isArbitraryFluidValue(value.slice(1))
-    );
+    return isAnyFluidValue(value.slice(1));
   }
   return false;
 }

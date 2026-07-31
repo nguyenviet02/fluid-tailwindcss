@@ -304,21 +304,31 @@ export function checkAccessibility(
 }
 
 /**
- * Parses a fluid value string like "4/8" or "base/2xl" into min and max parts
+ * Parses a fluid value string like "4/8" or "base/2xl" into min and max parts.
+ *
+ * A single value without "/" (e.g. "4" from `fl-p-4`) resolves to the same min
+ * and max, flagged as `single`. Callers use the flag to skip the "values must
+ * differ" validation that only applies to explicit pairs.
  */
 export function parseFluidString(
   value: string,
-): { min: string; max: string } | null {
+): { min: string; max: string; single: boolean } | null {
   // Ensure value is a string
   if (typeof value !== "string") {
     return null;
   }
 
-  // Split by "/" - the value should be in format "min/max"
+  // Split by "/" - the value should be in format "min/max" or a single value
   const parts = value.split("/");
 
-  if (parts.length !== 2) {
+  if (parts.length > 2) {
     return null;
+  }
+
+  if (parts.length === 1) {
+    const single = parts[0].trim();
+    if (!single) return null;
+    return { min: single, max: single, single: true };
   }
 
   const [min, max] = parts;
@@ -327,7 +337,7 @@ export function parseFluidString(
     return null;
   }
 
-  return { min: min.trim(), max: max.trim() };
+  return { min: min.trim(), max: max.trim(), single: false };
 }
 
 /**
@@ -684,25 +694,8 @@ export function calculateClampAdvanced(
     maxNum = maxNum + layoutSlope * (maxViewportRem - maxLayoutRem);
   }
 
-  // Handle edge case where values are equal
-  if (minNum === maxNum) {
-    let value: string;
-    if (preserveUnit && start.unit === "em") {
-      value = `${toPrecision(minNum, 4)}em`;
-    } else {
-      value = useRem
-        ? `${toPrecision(minNum, 4)}rem`
-        : `${toPrecision(minNum * rootFontSize, 4)}px`;
-    }
-    return {
-      result: value,
-      validation: {
-        valid: true,
-        warning: `Start and end values are equal (${value})`,
-      },
-    };
-  }
-
+  // Runs before the equal-value shortcut: a single value (`fl-p-4`) has equal
+  // min and max, yet still scales with the viewport in this mode.
   if (mode === "proportional") {
     // The max value lands on the design width: the layout viewport when set,
     // otherwise maxViewport. A per-class range always wins over both.
@@ -736,6 +729,25 @@ export function calculateClampAdvanced(
     }
 
     return { result, validation: { valid: true } };
+  }
+
+  // Handle edge case where values are equal
+  if (minNum === maxNum) {
+    let value: string;
+    if (preserveUnit && start.unit === "em") {
+      value = `${toPrecision(minNum, 4)}em`;
+    } else {
+      value = useRem
+        ? `${toPrecision(minNum, 4)}rem`
+        : `${toPrecision(minNum * rootFontSize, 4)}px`;
+    }
+    return {
+      result: value,
+      validation: {
+        valid: true,
+        warning: `Start and end values are equal (${value})`,
+      },
+    };
   }
 
   // Validate breakpoints
