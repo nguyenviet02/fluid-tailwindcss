@@ -11,6 +11,9 @@ importers:
       '@types/node':
         specifier: ^20.10.0
         version: 20.19.33
+      cn:
+        specifier: ^0.4.0
+        version: 0.4.0
       tailwind-merge:
         specifier: ^2.2.0
         version: 2.6.1
@@ -1461,6 +1464,12 @@ packages:
     dependencies:
       slice-ansi: 7.1.2
       string-width: 8.2.0
+    dev: true
+
+  /cn@0.4.0:
+    resolution: {integrity: sha512-qOAeUhPwPzBxx6jaeQdo646XIKliKHc2j1ZF7Ngb1o0pJZKH5gq8FkA0aVdUdPFUDXNXyUCXpCtoJISo6dhizg==}
+    engines: {node: '>=20'}
+    hasBin: true
     dev: true
 
   /color-convert@2.0.1:

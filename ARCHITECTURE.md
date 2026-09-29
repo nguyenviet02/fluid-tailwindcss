@@ -129,9 +129,10 @@ Special cases in `src/index.ts`:
 `src/tailwind-merge/index.ts` exports:
 
 - `twMerge`: preconfigured merge function with fluid groups.
-- `withFluid`: config extension for custom `tailwind-merge` instances.
+- `withFluid`: config extension for custom `tailwind-merge` instances, annotated as `FluidConfigExtension` so it also fits shadcn's `cn` `createCn()` without casts (issue #25).
 - `createTwMerge()`: fluid config plus optional additional merge config.
 - `createPrefixedTwMerge()`: merge instance for custom fluid utility prefixes.
+- Types `FluidClassGroupIds`, `FluidClassDefinition`, `FluidClassGroup`, and `FluidConfigExtension` (the structural common denominator of tailwind-merge's and cn's config extension types).
 - Validators such as `isFluidValue()`, `isArbitraryFluidValue()`, and `validateFluidClass()`.
 
 Any new utility added to `fluidUtilities` should also be represented in `withFluid.classGroups` and `withFluid.conflictingClassGroups` when it overlaps with standard Tailwind utilities.

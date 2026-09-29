@@ -73,7 +73,7 @@ describe("plugin variable handling", () => {
     const { handler } = fluidPlugin({
       "--text-h1": "36px/60px",
       variables: { "text-h1": "16px/32px" },
-    });
+    } as unknown as Record<string, string>);
     handler(createStub(addBase));
 
     const base = addBase.mock.calls[0][0];

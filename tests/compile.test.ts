@@ -16,15 +16,27 @@ async function buildCSS(candidates: string[], pluginOptions = "") {
     loadModule: async (id, loadBase) => {
       const resolved = path.resolve(loadBase, id);
       const mod = await import(resolved);
-      return { module: mod.default ?? mod, base: path.dirname(resolved) };
+      return {
+        path: resolved,
+        module: mod.default ?? mod,
+        base: path.dirname(resolved),
+      };
     },
     loadStylesheet: async (id, loadBase) => {
       if (id === "tailwindcss") {
         const cssPath = require.resolve("tailwindcss/index.css");
-        return { content: fs.readFileSync(cssPath, "utf-8"), base: path.dirname(cssPath) };
+        return {
+          path: cssPath,
+          content: fs.readFileSync(cssPath, "utf-8"),
+          base: path.dirname(cssPath),
+        };
       }
       const cssPath = path.resolve(loadBase, id);
-      return { content: fs.readFileSync(cssPath, "utf-8"), base: path.dirname(cssPath) };
+      return {
+        path: cssPath,
+        content: fs.readFileSync(cssPath, "utf-8"),
+        base: path.dirname(cssPath),
+      };
     },
   });
   return compiler.build(candidates);

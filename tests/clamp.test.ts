@@ -21,6 +21,12 @@ const defaultOptions: ResolvedFluidOptions = {
   useRem: true,
   rootFontSize: 16,
   checkAccessibility: true,
+  prefix: "",
+  separator: ":",
+  useContainerQuery: false,
+  debug: false,
+  validateUnits: true,
+  variables: {},
 };
 
 describe("parseValueToRem", () => {

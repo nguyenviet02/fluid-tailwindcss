@@ -17,6 +17,7 @@ const defaultOptions: ResolvedFluidOptions = {
   prefix: "",
   separator: ":",
   useContainerQuery: false,
+  variables: {},
   debug: false,
   validateUnits: true,
 };

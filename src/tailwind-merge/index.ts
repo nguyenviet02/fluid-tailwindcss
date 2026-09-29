@@ -1,5 +1,4 @@
 import { extendTailwindMerge } from "tailwind-merge";
-import type { Config } from "tailwind-merge";
 
 /**
  * Regex pattern for fluid values: min/max format with optional breakpoint range
@@ -52,7 +51,7 @@ export function isNegativeFluidValue(value: string): boolean {
 /**
  * Fluid class group IDs
  */
-type FluidClassGroupIds =
+export type FluidClassGroupIds =
   | "fluid-p"
   | "fluid-px"
   | "fluid-py"
@@ -128,10 +127,42 @@ type FluidClassGroupIds =
   | "fluid-scroll-pl";
 
 /**
- * Configuration to extend tailwind-merge with fluid utility support
- * Uses type assertion to work around strict typing with custom class groups
+ * Class group definition shared by tailwind-merge and shadcn's `cn` package.
+ * tailwind-merge's ThemeGetter is intentionally omitted because it is not
+ * assignable to cn's ClassGroupDef, keeping this config cast-free for both.
  */
-export const withFluid = {
+export type FluidClassDefinition =
+  | string
+  | ((classPart: string) => boolean)
+  | { [classPart: string]: readonly FluidClassDefinition[] };
+
+export type FluidClassGroup = readonly FluidClassDefinition[];
+
+interface FluidConfigGroups {
+  theme: Record<string, FluidClassGroup>;
+  classGroups: Record<string, FluidClassGroup>;
+  conflictingClassGroups: Record<string, readonly string[]>;
+  conflictingClassGroupModifiers: Record<string, readonly string[]>;
+  orderSensitiveModifiers: readonly string[];
+}
+
+/**
+ * Public type of the fluid tailwind-merge extension. The explicit annotation
+ * prevents TypeScript from inferring union arrays whose normalized
+ * `?: undefined` keys break assignability to index-signature types such as
+ * cn's ClassGroupDef (issue #25).
+ */
+export interface FluidConfigExtension {
+  prefix?: string;
+  cacheSize?: number;
+  override?: Partial<FluidConfigGroups>;
+  extend?: Partial<FluidConfigGroups>;
+}
+
+/**
+ * Configuration to extend tailwind-merge with fluid utility support
+ */
+export const withFluid: FluidConfigExtension = {
   extend: {
     classGroups: {
       // Padding utilities
@@ -146,41 +177,30 @@ export const withFluid = {
       "fluid-pe": [{ "fl-pe": [isAnyFluidValue] }],
 
       // Margin utilities (includes negative variants with 'neg-' prefix)
-      "fluid-m": [
-        { "fl-m": [isAnyFluidValue] },
-        { "neg-fl-m": [isAnyFluidValue] },
-      ],
+      "fluid-m": [{ "fl-m": [isAnyFluidValue], "neg-fl-m": [isAnyFluidValue] }],
       "fluid-mx": [
-        { "fl-mx": [isAnyFluidValue] },
-        { "neg-fl-mx": [isAnyFluidValue] },
+        { "fl-mx": [isAnyFluidValue], "neg-fl-mx": [isAnyFluidValue] },
       ],
       "fluid-my": [
-        { "fl-my": [isAnyFluidValue] },
-        { "neg-fl-my": [isAnyFluidValue] },
+        { "fl-my": [isAnyFluidValue], "neg-fl-my": [isAnyFluidValue] },
       ],
       "fluid-mt": [
-        { "fl-mt": [isAnyFluidValue] },
-        { "neg-fl-mt": [isAnyFluidValue] },
+        { "fl-mt": [isAnyFluidValue], "neg-fl-mt": [isAnyFluidValue] },
       ],
       "fluid-mr": [
-        { "fl-mr": [isAnyFluidValue] },
-        { "neg-fl-mr": [isAnyFluidValue] },
+        { "fl-mr": [isAnyFluidValue], "neg-fl-mr": [isAnyFluidValue] },
       ],
       "fluid-mb": [
-        { "fl-mb": [isAnyFluidValue] },
-        { "neg-fl-mb": [isAnyFluidValue] },
+        { "fl-mb": [isAnyFluidValue], "neg-fl-mb": [isAnyFluidValue] },
       ],
       "fluid-ml": [
-        { "fl-ml": [isAnyFluidValue] },
-        { "neg-fl-ml": [isAnyFluidValue] },
+        { "fl-ml": [isAnyFluidValue], "neg-fl-ml": [isAnyFluidValue] },
       ],
       "fluid-ms": [
-        { "fl-ms": [isAnyFluidValue] },
-        { "neg-fl-ms": [isAnyFluidValue] },
+        { "fl-ms": [isAnyFluidValue], "neg-fl-ms": [isAnyFluidValue] },
       ],
       "fluid-me": [
-        { "fl-me": [isAnyFluidValue] },
-        { "neg-fl-me": [isAnyFluidValue] },
+        { "fl-me": [isAnyFluidValue], "neg-fl-me": [isAnyFluidValue] },
       ],
 
       // Typography utilities
@@ -204,40 +224,31 @@ export const withFluid = {
 
       // Position utilities (includes negative variants with 'neg-' prefix)
       "fluid-inset": [
-        { "fl-inset": [isAnyFluidValue] },
-        { "neg-fl-inset": [isAnyFluidValue] },
+        { "fl-inset": [isAnyFluidValue], "neg-fl-inset": [isAnyFluidValue] },
       ],
       "fluid-inset-x": [
-        { "fl-inset-x": [isAnyFluidValue] },
-        { "neg-fl-inset-x": [isAnyFluidValue] },
+        { "fl-inset-x": [isAnyFluidValue], "neg-fl-inset-x": [isAnyFluidValue] },
       ],
       "fluid-inset-y": [
-        { "fl-inset-y": [isAnyFluidValue] },
-        { "neg-fl-inset-y": [isAnyFluidValue] },
+        { "fl-inset-y": [isAnyFluidValue], "neg-fl-inset-y": [isAnyFluidValue] },
       ],
       "fluid-top": [
-        { "fl-top": [isAnyFluidValue] },
-        { "neg-fl-top": [isAnyFluidValue] },
+        { "fl-top": [isAnyFluidValue], "neg-fl-top": [isAnyFluidValue] },
       ],
       "fluid-right": [
-        { "fl-right": [isAnyFluidValue] },
-        { "neg-fl-right": [isAnyFluidValue] },
+        { "fl-right": [isAnyFluidValue], "neg-fl-right": [isAnyFluidValue] },
       ],
       "fluid-bottom": [
-        { "fl-bottom": [isAnyFluidValue] },
-        { "neg-fl-bottom": [isAnyFluidValue] },
+        { "fl-bottom": [isAnyFluidValue], "neg-fl-bottom": [isAnyFluidValue] },
       ],
       "fluid-left": [
-        { "fl-left": [isAnyFluidValue] },
-        { "neg-fl-left": [isAnyFluidValue] },
+        { "fl-left": [isAnyFluidValue], "neg-fl-left": [isAnyFluidValue] },
       ],
       "fluid-start": [
-        { "fl-start": [isAnyFluidValue] },
-        { "neg-fl-start": [isAnyFluidValue] },
+        { "fl-start": [isAnyFluidValue], "neg-fl-start": [isAnyFluidValue] },
       ],
       "fluid-end": [
-        { "fl-end": [isAnyFluidValue] },
-        { "neg-fl-end": [isAnyFluidValue] },
+        { "fl-end": [isAnyFluidValue], "neg-fl-end": [isAnyFluidValue] },
       ],
 
       // Border utilities
@@ -258,22 +269,24 @@ export const withFluid = {
 
       // Space utilities (includes negative variants with 'neg-' prefix)
       "fluid-space-x": [
-        { "fl-space-x": [isAnyFluidValue] },
-        { "neg-fl-space-x": [isAnyFluidValue] },
+        { "fl-space-x": [isAnyFluidValue], "neg-fl-space-x": [isAnyFluidValue] },
       ],
       "fluid-space-y": [
-        { "fl-space-y": [isAnyFluidValue] },
-        { "neg-fl-space-y": [isAnyFluidValue] },
+        { "fl-space-y": [isAnyFluidValue], "neg-fl-space-y": [isAnyFluidValue] },
       ],
 
       // Translate utilities (includes negative variants with 'neg-' prefix)
       "fluid-translate-x": [
-        { "fl-translate-x": [isAnyFluidValue] },
-        { "neg-fl-translate-x": [isAnyFluidValue] },
+        {
+          "fl-translate-x": [isAnyFluidValue],
+          "neg-fl-translate-x": [isAnyFluidValue],
+        },
       ],
       "fluid-translate-y": [
-        { "fl-translate-y": [isAnyFluidValue] },
-        { "neg-fl-translate-y": [isAnyFluidValue] },
+        {
+          "fl-translate-y": [isAnyFluidValue],
+          "neg-fl-translate-y": [isAnyFluidValue],
+        },
       ],
 
       // Basis
@@ -476,9 +489,7 @@ export const withFluid = {
 /**
  * Pre-configured tailwind-merge instance with fluid support
  */
-export const twMerge = extendTailwindMerge(
-  withFluid as unknown as Config<FluidClassGroupIds, string>,
-);
+export const twMerge = extendTailwindMerge(withFluid);
 
 /**
  * Helper function to create a custom tailwind-merge instance with fluid support
@@ -490,16 +501,11 @@ export function createTwMerge(
 ) {
   if (additionalConfig) {
     // First extend with fluid config, then with additional config
-    return extendTailwindMerge(
-      withFluid as unknown as Config<FluidClassGroupIds, string>,
-      additionalConfig,
-    );
+    return extendTailwindMerge(withFluid, additionalConfig);
   }
 
   // Just return with fluid config
-  return extendTailwindMerge(
-    withFluid as unknown as Config<FluidClassGroupIds, string>,
-  );
+  return extendTailwindMerge(withFluid);
 }
 
 /**
@@ -516,7 +522,9 @@ export interface FluidMergeOptions {
  * Creates a tailwind-merge configuration with custom prefix support
  * Based on fluid-tailwind's approach to handling custom prefixes
  */
-export function createFluidMergeConfig(options: FluidMergeOptions = {}) {
+export function createFluidMergeConfig(
+  options: FluidMergeOptions = {},
+): FluidConfigExtension {
   const { prefix = "" } = options;
 
   // Generate class groups with custom prefix
@@ -669,9 +677,7 @@ export function createFluidMergeConfig(options: FluidMergeOptions = {}) {
  */
 export function createPrefixedTwMerge(options: FluidMergeOptions = {}) {
   const config = createFluidMergeConfig(options);
-  return extendTailwindMerge(
-    config as unknown as Config<FluidClassGroupIds, string>,
-  );
+  return extendTailwindMerge(config);
 }
 
 /**

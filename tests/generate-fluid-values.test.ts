@@ -74,7 +74,9 @@ describe("issue #8 non-default numeric spacing values", () => {
     const { options } = createUtilities();
     const bareValue = options.find(
       (option) => option.values?.__BARE_VALUE__ !== undefined,
-    )?.values?.__BARE_VALUE__;
+    )?.values?.__BARE_VALUE__ as
+      | (({ value }: { value: string }) => string | undefined)
+      | undefined;
 
     expect(bareValue?.({ value: "4.5" })).toBe("4.5");
     expect(bareValue?.({ value: "10" })).toBe("10");
@@ -338,10 +340,14 @@ describe("O(n) vs O(n²) value generation", () => {
 // ─── Cross-unit warning suppression tests ───────────────────────────────
 
 describe("cross-unit warning suppression", () => {
-  let warnSpy: ReturnType<typeof vi.spyOn>;
+  function spyWarn() {
+    return vi.spyOn(console, "warn").mockImplementation(() => {});
+  }
+
+  let warnSpy: ReturnType<typeof spyWarn>;
 
   beforeEach(() => {
-    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    warnSpy = spyWarn();
   });
 
   afterEach(() => {

@@ -148,7 +148,7 @@ describe("Issue #11: Arbitrary fluid value deduplication", () => {
 
   describe("withFluid config should use isAnyFluidValue (root cause)", () => {
     it("classGroups validators should accept arbitrary values", () => {
-      const classGroups = withFluid.extend.classGroups;
+      const classGroups = withFluid.extend?.classGroups ?? {};
 
       // Get the validator for fluid-text (first entry in the array, first key's array)
       const fluidTextGroup = classGroups["fluid-text"];

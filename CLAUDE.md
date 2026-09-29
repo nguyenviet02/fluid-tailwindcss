@@ -61,6 +61,7 @@ From the repository root:
 
 ```bash
 pnpm test:run
+pnpm test:types
 pnpm lint
 pnpm build
 ```

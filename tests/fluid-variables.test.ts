@@ -84,7 +84,7 @@ describe("generateFluidVariables", () => {
       baseOptions,
       { useContainerQuery: false },
     );
-    expect(result[":root"]["--fluid-text-h1"]).toBe(expected);
+    expect((result[":root"] as Record<string, string>)["--fluid-text-h1"]).toBe(expected);
   });
 
   it("emits bare number spacing clamps", () => {
@@ -100,7 +100,7 @@ describe("generateFluidVariables", () => {
       baseOptions,
       { useContainerQuery: false },
     );
-    expect(result[":root"]["--fluid-spacing-section"]).toBe(expected);
+    expect((result[":root"] as Record<string, string>)["--fluid-spacing-section"]).toBe(expected);
   });
 
   it("handles --md-lg breakpoint range", () => {
@@ -116,7 +116,7 @@ describe("generateFluidVariables", () => {
       baseOptions,
       { minViewport: 768, maxViewport: 1024 },
     );
-    expect(result[":root"]["--fluid-text-h1"]).toBe(expected);
+    expect((result[":root"] as Record<string, string>)["--fluid-text-h1"]).toBe(expected);
   });
 
   it("handles @md-lg legacy breakpoint range", () => {
@@ -132,7 +132,7 @@ describe("generateFluidVariables", () => {
       baseOptions,
       { minViewport: 768, maxViewport: 1024 },
     );
-    expect(result[":root"]["--fluid-text-h1"]).toBe(expected);
+    expect((result[":root"] as Record<string, string>)["--fluid-text-h1"]).toBe(expected);
   });
 
   it("handles --[768px-1024px] arbitrary breakpoint range", () => {
@@ -148,7 +148,7 @@ describe("generateFluidVariables", () => {
       baseOptions,
       { minViewport: 768, maxViewport: 1024 },
     );
-    expect(result[":root"]["--fluid-text-h1"]).toBe(expected);
+    expect((result[":root"] as Record<string, string>)["--fluid-text-h1"]).toBe(expected);
   });
 
   it("normalizes whitespace in specs", () => {
@@ -202,7 +202,7 @@ describe("generateFluidVariables", () => {
       screens,
     );
 
-    expect(result[":root"]["--fluid-text-h1"]).toContain("cqw");
+    expect((result[":root"] as Record<string, string>)["--fluid-text-h1"]).toContain("cqw");
   });
 
   it("honors useRem:false", () => {
@@ -212,8 +212,8 @@ describe("generateFluidVariables", () => {
       screens,
     );
 
-    expect(result[":root"]["--fluid-text-h1"]).toContain("px");
-    expect(result[":root"]["--fluid-text-h1"]).not.toContain("rem");
+    expect((result[":root"] as Record<string, string>)["--fluid-text-h1"]).toContain("px");
+    expect((result[":root"] as Record<string, string>)["--fluid-text-h1"]).not.toContain("rem");
   });
 
   it("returns empty object when variables is empty", () => {
@@ -227,7 +227,7 @@ describe("generateFluidVariables", () => {
       screens,
     );
 
-    expect(result[":root"]["--fluid-brand-gutter"]).toContain("clamp(");
+    expect((result[":root"] as Record<string, string>)["--fluid-brand-gutter"]).toContain("clamp(");
   });
 
   it("normalizes variable names with or without leading --", () => {
@@ -258,7 +258,7 @@ describe("generateFluidVariables", () => {
       baseOptions,
       { preserveUnit: true },
     );
-    expect(result[":root"]["--fluid-tracking-wide"]).toBe(expected);
+    expect((result[":root"] as Record<string, string>)["--fluid-tracking-wide"]).toBe(expected);
   });
 });
 
