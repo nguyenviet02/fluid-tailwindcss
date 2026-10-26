@@ -17,6 +17,7 @@ import { generateFluidVariables, fluidVariableThemeExtensions } from "./variable
 export type {
   FluidOptions,
   FluidPlugin,
+  FluidMode,
   ResolvedFluidOptions,
   FluidValue,
   UtilityDefinition,
@@ -98,6 +99,7 @@ const defaultOptions: ResolvedFluidOptions = {
   useContainerQuery: false,
   debug: false,
   validateUnits: true,
+  mode: "interpolation",
   variables: {},
 };
 
@@ -172,6 +174,24 @@ function normalizeOptions(options: FluidOptions): FluidOptions {
     options.maxLayoutViewport === undefined
   ) {
     normalized.maxLayoutViewport = options.maxlayoutviewport;
+  }
+
+  // CSS `@plugin` blocks deliver the mode as a raw declaration value, which may
+  // carry quotes or casing that never reaches the JS config form.
+  const rawMode: unknown = normalized.mode;
+  if (typeof rawMode === "string") {
+    const mode = rawMode
+      .trim()
+      .replace(/^["']|["']$/g, "")
+      .toLowerCase();
+    if (mode === "proportional" || mode === "interpolation") {
+      normalized.mode = mode;
+    } else {
+      console.warn(
+        `[fluid-tailwindcss] Unknown mode "${rawMode}". Falling back to "interpolation".`,
+      );
+      normalized.mode = "interpolation";
+    }
   }
 
   return normalized;
@@ -398,7 +418,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
           utilityName === "fl-translate-x" ||
           utilityName === "fl-translate-y"
         ) {
-          // Translate utilities need transform context
+          // Translate utilities also need the translate property
           registerTranslateUtility(
             utilityName,
             utilityDef,
@@ -443,7 +463,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
               if (!arbitraryParsed) return {};
 
               // Validate units match for arbitrary values
-              if (resolvedOptions.validateUnits) {
+              if (resolvedOptions.validateUnits && !arbitraryParsed.single) {
                 const validation = validateFluidUnits(
                   arbitraryParsed.min,
                   arbitraryParsed.max,
@@ -475,7 +495,7 @@ const fluidPlugin = plugin.withOptions<FluidOptions>(
             if (!minResolved || !maxResolved) return {};
 
             // Validate units match if validation is enabled
-            if (resolvedOptions.validateUnits) {
+            if (resolvedOptions.validateUnits && !parsed.single) {
               const validation = validateFluidUnits(minResolved, maxResolved);
               if (!validation.valid) {
                 if (resolvedOptions.debug) {
@@ -625,7 +645,7 @@ function registerSpaceUtility(
         const arbitraryParsed = parseFluidString(arbitraryValue);
         if (!arbitraryParsed) return {};
 
-        if (resolvedOptions.validateUnits) {
+        if (resolvedOptions.validateUnits && !arbitraryParsed.single) {
           const validation = validateFluidUnits(
             arbitraryParsed.min,
             arbitraryParsed.max,
@@ -654,7 +674,7 @@ function registerSpaceUtility(
 
       if (!minResolved || !maxResolved) return {};
 
-      if (resolvedOptions.validateUnits) {
+      if (resolvedOptions.validateUnits && !parsed.single) {
         const validation = validateFluidUnits(minResolved, maxResolved);
         if (!validation.valid) return {};
       }
@@ -695,7 +715,19 @@ function registerSpaceUtility(
 }
 
 /**
- * Registers translate utilities with transform context
+ * Value for the `translate` property used by the fluid translate utilities.
+ *
+ * Tailwind v4 applies translation through the standalone `translate` property
+ * instead of the composite `transform` of v3, which lets it compose with
+ * `rotate-*`/`scale-*`. The `0` fallbacks are required because Tailwind only
+ * emits the `@property` registrations for `--tw-translate-*` when one of its own
+ * translate utilities is used; without them the declaration would be invalid at
+ * computed-value time and dropped by the browser.
+ */
+const TRANSLATE_VALUE = "var(--tw-translate-x, 0) var(--tw-translate-y, 0)";
+
+/**
+ * Registers translate utilities that feed Tailwind's translate custom properties
  */
 function registerTranslateUtility(
   utilityName: string,
@@ -731,7 +763,7 @@ function registerTranslateUtility(
         const arbitraryParsed = parseFluidString(arbitraryValue);
         if (!arbitraryParsed) return {};
 
-        if (resolvedOptions.validateUnits) {
+        if (resolvedOptions.validateUnits && !arbitraryParsed.single) {
           const validation = validateFluidUnits(
             arbitraryParsed.min,
             arbitraryParsed.max,
@@ -747,7 +779,7 @@ function registerTranslateUtility(
         );
         return {
           [utilityDef.property as string]: result,
-          transform: `translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))`,
+          translate: TRANSLATE_VALUE,
         };
       }
 
@@ -759,7 +791,7 @@ function registerTranslateUtility(
 
       if (!minResolved || !maxResolved) return {};
 
-      if (resolvedOptions.validateUnits) {
+      if (resolvedOptions.validateUnits && !parsed.single) {
         const validation = validateFluidUnits(minResolved, maxResolved);
         if (!validation.valid) return {};
       }
@@ -773,7 +805,7 @@ function registerTranslateUtility(
 
       return {
         [utilityDef.property as string]: clampValue,
-        transform: `translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))`,
+        translate: TRANSLATE_VALUE,
       };
     };
   };

@@ -60,7 +60,8 @@ Important behaviors:
 
 - `normalizeOptions()` accepts lowercase option names such as `minviewport` because CSS `@plugin` blocks can lowercase camelCase values.
 - `generateFluidValues()` registers O(n) raw theme keys instead of O(n²) min/max pairs.
-- Tailwind v4 slash syntax is reconstructed from `value` and `extra.modifier`, so `fl-p-4/8` becomes the effective value `4/8`.
+- Tailwind v4 slash syntax is reconstructed from `value` and `extra.modifier`, so `fl-p-4/8` becomes the effective value `4/8`. Without a modifier the value stays single (`fl-p-4` → `4`).
+- `parseFluidString()` resolves a single value to an equal min/max pair and marks it `single`. Handlers skip the "values must differ" unit validation for those, because `no-change` is only an error for explicit pairs.
 - Spacing utilities accept bare numeric values through `__BARE_VALUE__`, enabling classes like `fl-mt-4.5/10`.
 - Negative utilities use `neg-fl-*` because Tailwind v4 does not allow plugin utility names starting with `-`.
 
@@ -102,6 +103,7 @@ Default options:
   useContainerQuery: false,
   debug: false,
   validateUnits: true,
+  mode: "interpolation",
 }
 ```
 
@@ -115,6 +117,21 @@ The main advanced path is `calculateClampAdvanced(minValue, maxValue, options, o
 6. Uses `cqw` instead of `vw` when container-query mode is enabled.
 7. Can apply negation and debug comments.
 
+### Scaling Modes
+
+The `mode` option selects how a min/max pair becomes a value. Both modes share the parsing, unit validation, negation, equal-value, and container-query behavior; they diverge only in the emitted expression.
+
+- `interpolation` (default): linear interpolation, optionally shifted by `minLayoutViewport`/`maxLayoutViewport` extrapolation. Equal values (including single values) short-circuit to a static value.
+- `proportional`: `buildProportionalValue()` expresses the max value as a viewport ratio reached at the design width (`maxLayoutViewport ?? maxViewport`, or a per-class range override), with the min value as a bound. It emits `max()` for growing values, `min()` for negated ones, a bare ratio when the min value is `0`, and `clamp()` when `maxLayoutViewport` moves the design width inside the viewport range.
+
+Proportional invariants:
+
+- The mode branch runs **before** the equal-value short-circuit, so single values (`fl-p-4`) scale instead of going static.
+- `minViewport` and `minLayoutViewport` are unused; the min value alone bounds the result.
+- Layout-viewport extrapolation is skipped, so the two features never stack.
+- `em` values under `preserveUnit` (i.e. `fl-tracking`) fall back to `interpolation`, because `em` depends on the element font-size.
+- Unknown `mode` strings are normalized to `interpolation` with a warning in `src/index.ts`; the CSS `@plugin` form may arrive quoted or upper-cased.
+
 ### Utility Definitions
 
 `src/utilities.ts` is the source of truth for supported class prefixes and CSS property mappings. When adding a new fluid utility, update this file first, then mirror support in `src/tailwind-merge/index.ts` if the utility should participate in merge conflict resolution.
@@ -122,7 +139,7 @@ The main advanced path is `calculateClampAdvanced(minValue, maxValue, options, o
 Special cases in `src/index.ts`:
 
 - `fl-space-x` / `fl-space-y` emit child selector rules.
-- `fl-translate-x` / `fl-translate-y` also emit a Tailwind transform expression.
+- `fl-translate-x` / `fl-translate-y` set Tailwind's `--tw-translate-*` variable and additionally emit `translate: var(--tw-translate-x, 0) var(--tw-translate-y, 0)`. The `0` fallbacks matter: Tailwind only registers those custom properties via `@property` when one of its own translate utilities is used, and an unresolvable `var()` would invalidate the whole declaration. Do not reintroduce the Tailwind v3 composite `transform`, which referenced variables (`--tw-rotate`, `--tw-scale-x`, …) that no longer exist in v4.
 
 ### Tailwind Merge Integration
 
@@ -163,6 +180,9 @@ Primary validation uses Vitest:
 - `tests/arbitrary-fluid-merge.test.ts`: arbitrary value merge behavior.
 - `tests/advanced-features.test.ts`: advanced options such as negative/container/debug behavior.
 - `tests/performance.test.ts`: performance characteristics.
+- `tests/layout-viewport.test.ts`: layout viewport extrapolation.
+- `tests/proportional-mode.test.ts`: proportional scaling mode and `mode` option normalization.
+- `tests/single-value.test.ts`: single-value classes in both modes, plus their `tailwind-merge` behavior.
 
 Use `npm run test:run` for CI-style tests and `npm test` for watch mode.
 
@@ -224,6 +244,7 @@ The homepage is a Vite React app using Tailwind CSS v4 and the local plugin. Aft
 - Keep public exports in `src/index.ts` aligned with new public helpers or types.
 - Keep package entry points in `package.json` aligned with `tsup.config.ts` output.
 - Keep `fluidUtilities` and `tailwind-merge` class groups synchronized.
-- Preserve Tailwind v4 support for slash modifiers and bare numeric spacing values.
+- Preserve Tailwind v4 support for slash modifiers, single values, and bare numeric spacing values.
+- Keep `isAnyFluidValue()` accepting pair, arbitrary, and single value forms; class groups rely on it for conflict resolution.
 - Preserve lowercase CSS plugin option aliases unless intentionally making a breaking change.
 - Prefer targeted fixes over broad refactors; this package has many public API surfaces.

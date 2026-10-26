@@ -117,15 +117,25 @@ Where:
 - `{min}` is the minimum value from the Tailwind scale
 - `{max}` is the maximum value from the Tailwind scale
 
+A single value is also supported:
+
+```
+fl-{utility}-{value}
+```
+
+The value is the design value at the maximum (layout) viewport. What that means depends on the scaling mode: in `proportional` mode it scales with the viewport and never falls below the given value, in `interpolation` mode it is simply a static value. See [Scaling Modes](#scaling-modes).
+
 ### Examples
 
-| Class              | Description                         |
-| ------------------ | ----------------------------------- |
-| `fl-p-4/8`         | Fluid padding from 1rem to 2rem     |
-| `fl-text-base/2xl` | Fluid font-size from 1rem to 1.5rem |
-| `fl-m-2/6`         | Fluid margin from 0.5rem to 1.5rem  |
-| `fl-gap-4/8`       | Fluid gap from 1rem to 2rem         |
-| `fl-w-64/96`       | Fluid width from 16rem to 24rem     |
+| Class              | Description                                              |
+| ------------------ | -------------------------------------------------------- |
+| `fl-p-4/8`         | Fluid padding from 1rem to 2rem                          |
+| `fl-text-base/2xl` | Fluid font-size from 1rem to 1.5rem                      |
+| `fl-m-2/6`         | Fluid margin from 0.5rem to 1.5rem                       |
+| `fl-gap-4/8`       | Fluid gap from 1rem to 2rem                              |
+| `fl-w-64/96`       | Fluid width from 16rem to 24rem                          |
+| `fl-p-4`           | Padding of 1rem at the design width (single value)       |
+| `fl-text-base`     | Font-size of 1rem at the design width (single value)     |
 
 ## Configuration
 
@@ -139,7 +149,8 @@ The plugin uses these defaults:
   maxViewport: 1440,  // Maximum viewport width in pixels
   useRem: true,       // Use rem units (vs px)
   rootFontSize: 16,   // Root font size for rem calculations
-  checkAccessibility: true  // Warn about small font sizes
+  checkAccessibility: true, // Warn about small font sizes
+  mode: 'interpolation'     // Scaling mode ('interpolation' or 'proportional')
 }
 ```
 
@@ -179,6 +190,108 @@ module.exports = {
   ],
 };
 ```
+
+## Scaling Modes
+
+The `mode` option controls how a `min/max` pair becomes a CSS value. Class names and utilities are identical in both modes, so a project can switch modes in one place.
+
+### `interpolation` (default)
+
+Both values are anchored to a viewport width and the value moves linearly between them:
+
+```css
+@plugin "fluid-tailwindcss" {
+  minviewport: 375;
+  maxviewport: 1440;
+}
+```
+
+```html
+<div class="fl-p-4/8"></div>
+```
+
+```css
+padding: clamp(1rem, 0.6479rem + 1.5023vw, 2rem);
+```
+
+The value is `1rem` at 375px, `2rem` at 1440px, and frozen outside that range.
+
+A single value has nothing to interpolate between, so `fl-p-4` becomes a plain `padding: 1rem`.
+
+### `proportional`
+
+The max value is expressed as a plain viewport ratio, which keeps the proportions between elements intact at every width — useful for design-driven layouts where relative sizing matters more than exact breakpoint values. The min value becomes a lower bound, so text and spacing never collapse the way a raw `7vw` would:
+
+```css
+@plugin "fluid-tailwindcss" {
+  mode: proportional;
+  minviewport: 375;
+  maxviewport: 1440;
+}
+```
+
+```html
+<div class="fl-p-4/8"></div>
+```
+
+```css
+padding: max(1rem, 2.2222vw);
+```
+
+`2rem` (32px) at a 1440px design width is `32 / 1440 = 2.2222vw`, and the value never drops below `1rem`.
+
+#### Capping growth with layout viewports
+
+Set `maxLayoutViewport` to the width your design values refer to, and `maxViewport` becomes the width where scaling stops:
+
+```css
+@plugin "fluid-tailwindcss" {
+  mode: proportional;
+  minviewport: 375;
+  maxviewport: 1920;
+  minlayoutviewport: 480;
+  maxlayoutviewport: 1440;
+}
+```
+
+```css
+padding: clamp(1rem, 2.2222vw, 2.67rem);
+```
+
+The ratio is still derived from the 1440px design width, and `2.67rem` is what `2.2222vw` resolves to at 1920px.
+
+#### Single values
+
+Because the second value only serves as a bound, a single value is enough to describe a proportional element. `fl-p-4` means "16px at the design width":
+
+```css
+@plugin "fluid-tailwindcss" {
+  mode: proportional;
+  maxlayoutviewport: 1440;
+}
+```
+
+```html
+<div class="fl-p-4"></div>
+```
+
+```css
+padding: max(1rem, 1.1111vw);
+```
+
+The padding is exactly `1rem` at 1440px, never shrinks below `1rem` on narrower viewports, and grows proportionally on wider ones. Adding `maxViewport: 1920` stops that growth at 1920px:
+
+```css
+padding: clamp(1rem, 1.1111vw, 1.33rem);
+```
+
+Notes for `proportional` mode:
+
+- `minViewport` and `minLayoutViewport` are not used; the min value alone defines the lower bound.
+- A per-class breakpoint range (`fl-p-4/8--md-lg`) overrides the design width and drops the cap.
+- `useContainerQuery` swaps `vw` for `cqw` as usual.
+- `em` values (`fl-tracking`) fall back to `interpolation`, since `em` is relative to the element font-size and cannot be expressed as a viewport ratio.
+- Negative utilities (`neg-fl-*`) mirror the behavior with `min()`.
 
 ## Supported Utilities
 
@@ -240,10 +353,12 @@ module.exports = {
 
 ### Transform
 
-| Utility          | CSS Property       |
-| ---------------- | ------------------ |
-| `fl-translate-x` | `--tw-translate-x` |
-| `fl-translate-y` | `--tw-translate-y` |
+| Utility          | CSS Property                                |
+| ---------------- | ------------------------------------------- |
+| `fl-translate-x` | `--tw-translate-x`, applied via `translate`  |
+| `fl-translate-y` | `--tw-translate-y`, applied via `translate`  |
+
+Both set the same custom properties as Tailwind's own `translate-*` utilities, so they compose with `rotate-*` and `scale-*` and can be combined for both axes.
 
 ### Scroll
 
@@ -270,6 +385,7 @@ Any custom property declaration starting with `--` inside the `@plugin` block is
   --text-h1: 36px/60px;
   --spacing-gutter: 16px/32px;
   --brand-color-padding: 2/6; /* Bare numbers resolve against spacing scale (0.5rem to 1.5rem) */
+  --spacing-section: 96px; /* Single value: scales in proportional mode, static otherwise */
 }
 ```
 

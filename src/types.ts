@@ -2,6 +2,17 @@ import type { Length } from "./length";
 import type { FluidError } from "./errors";
 
 /**
+ * Scaling mode used to turn a `min/max` pair into a CSS value.
+ *
+ * - `interpolation`: linear interpolation between the two values,
+ *   emitted as `clamp(min, <linear vw expression>, max)`.
+ * - `proportional`: the max value is expressed as a pure viewport ratio
+ *   (`<max> / maxViewport`), floored by the min value. This keeps the
+ *   proportions between elements intact at every viewport width.
+ */
+export type FluidMode = "interpolation" | "proportional";
+
+/**
  * Configuration options for the fluid-tailwindcss plugin
  * Note: Both camelCase and lowercase variants are supported
  * (Prettier may convert camelCase to lowercase in CSS @plugin blocks)
@@ -82,6 +93,19 @@ export interface FluidOptions {
   validateunits?: boolean;
 
   /**
+   * How `min/max` pairs are turned into a CSS value.
+   *
+   * In `proportional` mode the max value scales as a plain viewport ratio
+   * (`max` reached at `maxLayoutViewport ?? maxViewport`), the min value acts as
+   * a floor, and `maxViewport` caps the growth when `maxLayoutViewport` is set.
+   * `minLayoutViewport` and `minViewport` are not used in this mode, and `em`
+   * values (`fl-tracking`) fall back to `interpolation`.
+   *
+   * @default 'interpolation'
+   */
+  mode?: FluidMode;
+
+  /**
    * Minimum layout viewport in pixels where the min fluid value is reached.
    * When set, fluid scaling extrapolates beyond this point down to minViewport.
    * Must satisfy: minViewport <= minLayoutViewport < maxLayoutViewport <= maxViewport
@@ -125,6 +149,7 @@ export interface ResolvedFluidOptions {
   useContainerQuery: boolean;
   debug: boolean;
   validateUnits: boolean;
+  mode: FluidMode;
   minLayoutViewport?: number;
   maxLayoutViewport?: number;
   variables: Record<string, string>;

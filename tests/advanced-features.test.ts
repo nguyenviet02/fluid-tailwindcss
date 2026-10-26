@@ -19,6 +19,7 @@ const defaultOptions: ResolvedFluidOptions = {
   variables: {},
   debug: false,
   validateUnits: true,
+  mode: "interpolation",
 };
 
 describe("calculateClampAdvanced", () => {

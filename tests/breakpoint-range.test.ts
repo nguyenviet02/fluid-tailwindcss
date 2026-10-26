@@ -20,6 +20,7 @@ const defaultOptions: ResolvedFluidOptions = {
   variables: {},
   debug: false,
   validateUnits: true,
+  mode: "interpolation",
 };
 
 const screens: Record<string, number> = {

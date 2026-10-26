@@ -2,6 +2,7 @@ import type {
   ResolvedFluidOptions,
   PerUtilityBreakpoints,
   ValidationResult,
+  FluidMode,
 } from "./types";
 import { Length } from "./length";
 import { FluidError } from "./errors";
@@ -303,21 +304,31 @@ export function checkAccessibility(
 }
 
 /**
- * Parses a fluid value string like "4/8" or "base/2xl" into min and max parts
+ * Parses a fluid value string like "4/8" or "base/2xl" into min and max parts.
+ *
+ * A single value without "/" (e.g. "4" from `fl-p-4`) resolves to the same min
+ * and max, flagged as `single`. Callers use the flag to skip the "values must
+ * differ" validation that only applies to explicit pairs.
  */
 export function parseFluidString(
   value: string,
-): { min: string; max: string } | null {
+): { min: string; max: string; single: boolean } | null {
   // Ensure value is a string
   if (typeof value !== "string") {
     return null;
   }
 
-  // Split by "/" - the value should be in format "min/max"
+  // Split by "/" - the value should be in format "min/max" or a single value
   const parts = value.split("/");
 
-  if (parts.length !== 2) {
+  if (parts.length > 2) {
     return null;
+  }
+
+  if (parts.length === 1) {
+    const single = parts[0].trim();
+    if (!single) return null;
+    return { min: single, max: single, single: true };
   }
 
   const [min, max] = parts;
@@ -326,7 +337,7 @@ export function parseFluidString(
     return null;
   }
 
-  return { min: min.trim(), max: max.trim() };
+  return { min: min.trim(), max: max.trim(), single: false };
 }
 
 /**
@@ -479,9 +490,63 @@ export function resolveThemeValue(
 }
 
 /**
+ * Builds a proportional-mode value.
+ *
+ * The max value is expressed as a pure viewport ratio, so it is reached exactly
+ * at `basisViewport` and keeps its proportion at every other width. The min
+ * value is a bound rather than a second interpolation point: it floors growing
+ * values and caps shrinking (negated) ones. When `ceilingViewport` is larger
+ * than the basis, scaling stops there instead of continuing indefinitely.
+ *
+ * @param minNum - Min value in rem (already negated when applicable)
+ * @param maxNum - Max value in rem
+ * @param basisViewport - Viewport width in px where maxNum is reached
+ * @param ceilingViewport - Viewport width in px where scaling stops, if any
+ */
+function buildProportionalValue(
+  minNum: number,
+  maxNum: number,
+  basisViewport: number,
+  ceilingViewport: number | undefined,
+  options: {
+    rootFontSize: number;
+    useRem: boolean;
+    viewportUnit: string;
+    precision: number;
+  },
+): string {
+  const { rootFontSize, useRem, viewportUnit, precision } = options;
+
+  const format = (num: number) =>
+    useRem
+      ? `${toPrecision(num, precision)}rem`
+      : `${toPrecision(num * rootFontSize, precision)}px`;
+
+  // A zero max value never leaves the bound, so the bound is the whole value
+  if (maxNum === 0) return format(minNum);
+
+  const basisRem = basisViewport / rootFontSize;
+  const slope = (maxNum / basisRem) * 100;
+  // The ratio needs more digits than the bounds to land accurately on the basis
+  const preferred = `${toPrecision(slope, Math.max(precision, 4))}${viewportUnit}`;
+
+  if (ceilingViewport != null && ceilingViewport > basisViewport) {
+    const capped = maxNum * (ceilingViewport / basisViewport);
+    return `clamp(${format(Math.min(minNum, capped))}, ${preferred}, ${format(Math.max(minNum, capped))})`;
+  }
+
+  if (minNum === 0) return preferred;
+
+  return maxNum < 0
+    ? `min(${format(minNum)}, ${preferred})`
+    : `max(${format(minNum)}, ${preferred})`;
+}
+
+/**
  * Advanced clamp calculation with additional features:
  * - Per-utility custom breakpoints
  * - Container query support (cqw)
+ * - Proportional scaling mode
  * - Debug comments
  * - Unit validation
  */
@@ -493,6 +558,7 @@ export function calculateClampAdvanced(
     negate?: boolean;
     useContainerQuery?: boolean;
     preserveUnit?: boolean;
+    mode?: FluidMode;
   },
 ): { result: string; validation: ValidationResult } {
   const { rootFontSize, useRem, debug } = options;
@@ -553,6 +619,14 @@ export function calculateClampAdvanced(
     }
   }
 
+  // em values are relative to the element font-size, so they cannot be expressed
+  // as a viewport ratio; those keep interpolating.
+  const preservedEm = preserveUnit && start.unit === "em";
+  const mode: FluidMode =
+    (overrides?.mode ?? options.mode) === "proportional" && !preservedEm
+      ? "proportional"
+      : "interpolation";
+
   // When preserveUnit is true, keep the original unit (e.g., em for letter-spacing)
   // instead of converting to rem. This is important because em is relative to the
   // element's font-size, not the root font-size.
@@ -605,6 +679,7 @@ export function calculateClampAdvanced(
   const maxLayoutVp = options.maxLayoutViewport;
 
   if (
+    mode === "interpolation" &&
     !hasBreakpointOverride &&
     minLayoutVp != null &&
     maxLayoutVp != null &&
@@ -617,6 +692,43 @@ export function calculateClampAdvanced(
     // Extrapolate to global viewport boundaries
     minNum = minNum - layoutSlope * (minLayoutRem - minViewportRem);
     maxNum = maxNum + layoutSlope * (maxViewportRem - maxLayoutRem);
+  }
+
+  // Runs before the equal-value shortcut: a single value (`fl-p-4`) has equal
+  // min and max, yet still scales with the viewport in this mode.
+  if (mode === "proportional") {
+    // The max value lands on the design width: the layout viewport when set,
+    // otherwise maxViewport. A per-class range always wins over both.
+    const basisViewport = hasBreakpointOverride
+      ? maxViewport
+      : (maxLayoutVp ?? maxViewport);
+    // Scaling only stops early when a layout viewport moved the design width
+    // inside the viewport range.
+    const ceilingViewport =
+      !hasBreakpointOverride && maxLayoutVp != null ? maxViewport : undefined;
+
+    let result = buildProportionalValue(
+      minNum,
+      maxNum,
+      basisViewport,
+      ceilingViewport,
+      {
+        rootFontSize,
+        useRem,
+        viewportUnit: useContainerQuery ? "cqw" : "vw",
+        precision: Math.max(getPrecision(minNum), getPrecision(maxNum), 2),
+      },
+    );
+
+    if (debug) {
+      const cap =
+        ceilingViewport != null && ceilingViewport > basisViewport
+          ? `, capped at ${ceilingViewport}px`
+          : "";
+      result = `${result} /* fluid proportional ${end.cssText} at ${basisViewport}px, bound ${start.cssText}${cap}${useContainerQuery ? " (container)" : ""} */`;
+    }
+
+    return { result, validation: { valid: true } };
   }
 
   // Handle edge case where values are equal
